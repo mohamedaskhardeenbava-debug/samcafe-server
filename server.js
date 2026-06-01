@@ -15,7 +15,7 @@ const io = new Server(server, {
 });
 
 const JSON_SERVER = process.env.JSON_SERVER_URL || "http://localhost:5000";
-
+const PORT = process.env.PORT || 4000;
 /* ─────────────────────────────────────────
    BELL STATE (in-memory)
    Persists while server is running so any
@@ -317,6 +317,6 @@ function broadcast(event) {
 /* ─────────────────────────────────────────
    🚀 START SERVER
 ───────────────────────────────────────── */
-server.listen(4000, () => {
-  console.log("🚀 Server running on http://localhost:4000");
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
