@@ -16,13 +16,11 @@ const io = new Server(server, {
 
 const JSON_SERVER = process.env.JSON_SERVER_URL || "http://localhost:5000";
 const PORT = process.env.PORT || 4000;
+
 /* ─────────────────────────────────────────
    BELL STATE (in-memory)
-   Persists while server is running so any
-   newly-connecting client can receive the
-   current state on "bell-sync".
 ───────────────────────────────────────── */
-let activeBells = {}; // { [tableNo]: true }
+let activeBells = {};
 
 /* ─────────────────────────────────────────
    SOCKET CONNECTION
@@ -30,39 +28,27 @@ let activeBells = {}; // { [tableNo]: true }
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
 
-  // Send current bell state to the newly connected client
   socket.emit("bell-sync", activeBells);
 
-  // ── User rings bell ──────────────────────────────────────────────────────
-  // payload: { tableNo: "T3" }
-  // AFTER
   socket.on("bell-ring", (payload) => {
     const { tableNo } = payload || {};
     if (!tableNo) {
       console.warn("bell-ring received with no tableNo, ignoring");
       return;
     }
-
     activeBells[tableNo] = true;
     console.log(`🔔 Bell ring from table ${tableNo}`);
-
-    // Broadcast to ALL clients (admin + the user's own tab for audio)
     io.emit("bell-ring", { tableNo });
   });
 
-  // ── Admin silences bell ──────────────────────────────────────────────────
-  // payload: { tableNo: "T3" }
   socket.on("bell-off", (payload) => {
     const { tableNo } = payload || {};
     if (!tableNo) return;
-
     delete activeBells[tableNo];
     console.log(`🔕 Bell off for table ${tableNo}`);
-
     io.emit("bell-off", { tableNo });
   });
 
-  // ── Admin panel broadcasts a theme change → relay to ALL user panels ─────
   socket.on("theme-update", (payload) => {
     console.log("📡 Theme update broadcast from admin");
     socket.broadcast.emit("theme-update", payload);
@@ -89,7 +75,97 @@ async function updateUser(user) {
 }
 
 /* ─────────────────────────────────────────
+   📦 GET ALL ORDERS (FLATTENED)
+   ⚠️  Must be defined BEFORE generic /:resource
+───────────────────────────────────────── */
+app.get("/orders", async (req, res) => {
+  try {
+    const users = await getUsers();
+    const orders = users.flatMap((u) =>
+      (u.orders || []).map((o) => ({ ...o, userId: u.id }))
+    );
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
+/* ─────────────────────────────────────────
+   ➕ CREATE ORDER
+   ⚠️  Must be defined BEFORE generic /:resource
+───────────────────────────────────────── */
+app.post("/orders", async (req, res) => {
+  try {
+    const newOrder = req.body;
+    const users = await getUsers();
+    const user = users.find((u) => u.id === newOrder.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    user.orders = user.orders || [];
+    user.orders.push(newOrder);
+    await updateUser(user);
+    broadcast("ordersUpdated");
+    res.json(newOrder);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to create order" });
+  }
+});
+
+/* ─────────────────────────────────────────
+   🔄 UPDATE ITEM STATUS
+───────────────────────────────────────── */
+app.patch("/orders/:orderId/item", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { itemIndex, status } = req.body;
+    const users = await getUsers();
+    for (const user of users) {
+      const order = user.orders?.find((o) => o.id === orderId);
+      if (order) {
+        if (!order.items[itemIndex])
+          return res.status(400).json({ error: "Invalid item index" });
+        order.items[itemIndex].status = status;
+        const allDone = order.items.every((i) => i.status === "completed");
+        if (allDone) order.status = "completed";
+        order.updatedAt = new Date().toISOString();
+        await updateUser(user);
+        io.emit("data-change", { resource: "orders", action: "updated" });
+        return res.json({ success: true, order });
+      }
+    }
+    res.status(404).json({ error: "Order not found" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update item" });
+  }
+});
+
+/* ─────────────────────────────────────────
+   🔥 BULK ORDER STATUS UPDATE
+───────────────────────────────────────── */
+app.patch("/orders/:orderId/status", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    const users = await getUsers();
+    for (const user of users) {
+      const order = user.orders?.find((o) => o.id === orderId);
+      if (order) {
+        order.status = status;
+        order.items = order.items.map((i) => ({ ...i, status }));
+        order.updatedAt = new Date().toISOString();
+        await updateUser(user);
+        broadcast("ordersUpdated");
+        return res.json(order);
+      }
+    }
+    res.status(404).json({ error: "Order not found" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update order" });
+  }
+});
+
+/* ─────────────────────────────────────────
    🔁 GENERIC JSON SERVER PROXY
+   ⚠️  These must come AFTER all specific routes
 ───────────────────────────────────────── */
 
 // GET all
@@ -122,13 +198,11 @@ app.post("/:resource", async (req, res) => {
       `${JSON_SERVER}/${req.params.resource}`,
       req.body
     );
-
     io.emit("data-change", {
       resource: req.params.resource,
       action: "created",
       payload: r.data
     });
-
     res.json(r.data);
   } catch (err) {
     res.status(500).json({ error: "Failed to create resource" });
@@ -142,13 +216,11 @@ app.put("/:resource/:id", async (req, res) => {
       `${JSON_SERVER}/${req.params.resource}/${req.params.id}`,
       req.body
     );
-
     io.emit("data-change", {
       resource: req.params.resource,
       action: "updated",
       payload: r.data
     });
-
     res.json(r.data);
   } catch (err) {
     res.status(500).json({ error: "Failed to update resource" });
@@ -166,143 +238,32 @@ app.put("/:resource", async (req, res) => {
   }
 });
 
-// DELETE
+// DELETE by id
+// ⚠️  Do NOT pre-fetch before deleting.
+//     json-server's lodash-id plugin calls .toString() on every record id
+//     during its internal scan. A GET immediately before DELETE causes a race
+//     where lodash-id finds null and throws:
+//       "Cannot read properties of null (reading 'toString')" → 500
+//     Removing the pre-fetch eliminates the crash entirely.
+//     App.js only needs { id } in the socket payload for targeted filter.
+// DELETE by id
+// DELETE by id
 app.delete("/:resource/:id", async (req, res) => {
+  const { resource, id } = req.params;
   try {
-    await axios.delete(
-      `${JSON_SERVER}/${req.params.resource}/${req.params.id}`
-    );
+    await axios.delete(`${JSON_SERVER}/${resource}/${id}`);
 
     io.emit("data-change", {
-      resource: req.params.resource,
+      resource,
       action: "deleted",
-      payload: req.params.id
+      id,
+      payload: { id }
     });
 
-    res.json({ success: true });
+    res.json({ success: true, id });
   } catch (err) {
-    res.status(500).json({ error: "Failed to delete resource" });
-  }
-});
-
-/* ─────────────────────────────────────────
-   📦 GET ALL ORDERS (FLATTENED)
-───────────────────────────────────────── */
-app.get("/orders", async (req, res) => {
-  try {
-    const users = await getUsers();
-
-    const orders = users.flatMap((u) =>
-      (u.orders || []).map((o) => ({
-        ...o,
-        userId: u.id
-      }))
-    );
-
-    res.json(orders);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch orders" });
-  }
-});
-
-/* ─────────────────────────────────────────
-   🔄 UPDATE ITEM STATUS
-───────────────────────────────────────── */
-app.patch("/orders/:orderId/item", async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { itemIndex, status } = req.body;
-
-    const users = await getUsers();
-
-    for (const user of users) {
-      const order = user.orders?.find((o) => o.id === orderId);
-
-      if (order) {
-        if (!order.items[itemIndex]) {
-          return res.status(400).json({ error: "Invalid item index" });
-        }
-
-        order.items[itemIndex].status = status;
-
-        const allDone = order.items.every((i) => i.status === "completed");
-        if (allDone) order.status = "completed";
-
-        order.updatedAt = new Date().toISOString();
-
-        await updateUser(user);
-
-        io.emit("data-change", {
-          resource: "orders",
-          action: "updated"
-        });
-
-        return res.json({ success: true, order });
-      }
-    }
-
-    res.status(404).json({ error: "Order not found" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update item" });
-  }
-});
-
-/* ─────────────────────────────────────────
-   ➕ CREATE ORDER
-───────────────────────────────────────── */
-app.post("/orders", async (req, res) => {
-  try {
-    const newOrder = req.body;
-    const users = await getUsers();
-
-    const user = users.find((u) => u.id === newOrder.userId);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    user.orders = user.orders || [];
-    user.orders.push(newOrder);
-
-    await updateUser(user);
-
-    broadcast("ordersUpdated");
-
-    res.json(newOrder);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to create order" });
-  }
-});
-
-/* ─────────────────────────────────────────
-   🔥 BULK ORDER STATUS UPDATE
-───────────────────────────────────────── */
-app.patch("/orders/:orderId/status", async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { status } = req.body;
-
-    const users = await getUsers();
-
-    for (const user of users) {
-      const order = user.orders?.find((o) => o.id === orderId);
-
-      if (order) {
-        order.status = status;
-        order.items = order.items.map((i) => ({ ...i, status }));
-        order.updatedAt = new Date().toISOString();
-
-        await updateUser(user);
-
-        broadcast("ordersUpdated");
-
-        return res.json(order);
-      }
-    }
-
-    res.status(404).json({ error: "Order not found" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update order" });
+    console.error(`DELETE /${resource}/${id} failed:`, err.message);
+    res.status(500).json({ error: "Failed to delete resource", id });
   }
 });
 
