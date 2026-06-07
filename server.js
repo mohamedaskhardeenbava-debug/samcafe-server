@@ -239,28 +239,30 @@ app.put("/:resource", async (req, res) => {
 });
 
 // DELETE by id
-// ⚠️  Do NOT pre-fetch before deleting.
-//     json-server's lodash-id plugin calls .toString() on every record id
-//     during its internal scan. A GET immediately before DELETE causes a race
-//     where lodash-id finds null and throws:
-//       "Cannot read properties of null (reading 'toString')" → 500
-//     Removing the pre-fetch eliminates the crash entirely.
-//     App.js only needs { id } in the socket payload for targeted filter.
-// DELETE by id
-// DELETE by id
+// Fetch the record first so the socket payload includes the full object.
+// App.js uses payload.id to do a targeted filter — no re-fetch needed.
 app.delete("/:resource/:id", async (req, res) => {
   const { resource, id } = req.params;
   try {
+    // 1. Grab the record before deletion so we can send it in the socket event
+    let deletedRecord = null;
+    try {
+      const fetchRes = await axios.get(`${JSON_SERVER}/${resource}/${id}`);
+      deletedRecord = fetchRes.data;
+    } catch (_) { /* record may already be gone — that's fine */ }
+
+    // 2. Delete from json-server
     await axios.delete(`${JSON_SERVER}/${resource}/${id}`);
 
+    // 3. Emit data-change with full payload so App.js can do targeted removal
     io.emit("data-change", {
       resource,
       action: "deleted",
       id,
-      payload: { id }
+      payload: deletedRecord ?? { id }
     });
 
-    res.json({ success: true, id });
+    res.json({ success: true, id, deleted: deletedRecord });
   } catch (err) {
     console.error(`DELETE /${resource}/${id} failed:`, err.message);
     res.status(500).json({ error: "Failed to delete resource", id });
@@ -281,3 +283,37 @@ function broadcast(event) {
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+/* ─────────────────────────────────────────
+   🏓 KEEP-ALIVE SELF-PING
+   Prevents Render free tier from spinning
+   down after 15 min of inactivity.
+   Set SELF_URL env var on Render to your
+   Express server's public URL.
+   Set DATA_URL env var to your data
+   service's public URL.
+───────────────────────────────────────── */
+const SELF_URL = process.env.SELF_URL || null;
+const DATA_URL = process.env.JSON_SERVER_URL || null;
+
+if (SELF_URL) {
+  setInterval(async () => {
+    try {
+      await axios.get(SELF_URL + "/categories");
+      console.log("\u{1F3D3} Keep-alive: server pinged");
+    } catch (err) {
+      console.warn("\u{1F3D3} Keep-alive server ping failed:", err.message);
+    }
+  }, 10 * 60 * 1000);
+}
+
+if (DATA_URL) {
+  setInterval(async () => {
+    try {
+      await axios.get(DATA_URL + "/categories");
+      console.log("\u{1F3D3} Keep-alive: data service pinged");
+    } catch (err) {
+      console.warn("\u{1F3D3} Keep-alive data ping failed:", err.message);
+    }
+  }, 10 * 60 * 1000);
+}
