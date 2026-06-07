@@ -14,7 +14,7 @@ const io = new Server(server, {
   cors: { origin: "*" }
 });
 
-const JSON_SERVER = process.env.JSON_SERVER_URL || "http://localhost:5000";
+const JSON_SERVER = process.env.JSON_SERVER_URL || "http://localhost:10000";
 const PORT = process.env.PORT || 4000;
 
 /* ─────────────────────────────────────────
@@ -174,7 +174,7 @@ app.get("/:resource", async (req, res) => {
     const r = await axios.get(`${JSON_SERVER}/${req.params.resource}`);
     res.json(r.data);
   } catch (err) {
-    console.error("GET ERROR:", err.message);
+    console.error("GET ERROR:", err.message || err);
     res.status(500).json({ error: "Failed to fetch resource" });
   }
 });
@@ -239,30 +239,12 @@ app.put("/:resource", async (req, res) => {
 });
 
 // DELETE by id
-// Fetch the record first so the socket payload includes the full object.
-// App.js uses payload.id to do a targeted filter — no re-fetch needed.
 app.delete("/:resource/:id", async (req, res) => {
   const { resource, id } = req.params;
   try {
-    // 1. Grab the record before deletion so we can send it in the socket event
-    let deletedRecord = null;
-    try {
-      const fetchRes = await axios.get(`${JSON_SERVER}/${resource}/${id}`);
-      deletedRecord = fetchRes.data;
-    } catch (_) { /* record may already be gone — that's fine */ }
-
-    // 2. Delete from json-server
     await axios.delete(`${JSON_SERVER}/${resource}/${id}`);
-
-    // 3. Emit data-change with full payload so App.js can do targeted removal
-    io.emit("data-change", {
-      resource,
-      action: "deleted",
-      id,
-      payload: deletedRecord ?? { id }
-    });
-
-    res.json({ success: true, id, deleted: deletedRecord });
+    io.emit("data-change", { resource, action: "deleted", id, payload: { id } });
+    res.json({ success: true, id });
   } catch (err) {
     console.error(`DELETE /${resource}/${id} failed:`, err.message);
     res.status(500).json({ error: "Failed to delete resource", id });
