@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -7,6 +9,7 @@ const axios = require("axios");
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 const server = http.createServer(app);
 
@@ -14,7 +17,7 @@ const io = new Server(server, {
   cors: { origin: "*" }
 });
 
-const JSON_SERVER = process.env.JSON_SERVER_URL || "http://localhost:10000";
+const JSON_SERVER = process.env.JSON_SERVER_URL || "http://localhost:5000";
 const PORT = process.env.PORT || 4000;
 
 /* ─────────────────────────────────────────
@@ -75,37 +78,100 @@ async function updateUser(user) {
 }
 
 /* ─────────────────────────────────────────
-   📦 GET ALL ORDERS (FLATTENED)
+   HELPER: GENERATE NEXT ORDER ID
+   Fetches the top 10 orders sorted by id desc,
+   finds the true max number, increments by 1.
+   Retries once if the generated id already exists.
+───────────────────────────────────────── */
+async function generateOrderId() {
+  const res = await axios.get(
+    `${JSON_SERVER}/orders?_sort=id&_order=desc&_limit=10`
+  );
+  const orders = res.data || [];
+
+  const maxNum =
+    orders.length > 0
+      ? Math.max(
+        ...orders
+          .map((o) => parseInt(o.id?.replace("order_", "")) || 0)
+          .filter((n) => !isNaN(n))
+      )
+      : 0;
+
+  const candidate = `order_${String(maxNum + 1).padStart(5, "0")}`;
+
+  // Safety check: if this ID already exists, go one higher
+  try {
+    await axios.get(`${JSON_SERVER}/orders/${candidate}`);
+    // If we reach here, it exists — go one higher
+    return `order_${String(maxNum + 2).padStart(5, "0")}`;
+  } catch {
+    // 404 means it doesn't exist — safe to use
+    return candidate;
+  }
+}
+
+/* ─────────────────────────────────────────
+   📦 GET ALL ORDERS
+   Reads directly from the orders collection.
    ⚠️  Must be defined BEFORE generic /:resource
 ───────────────────────────────────────── */
 app.get("/orders", async (req, res) => {
   try {
-    const users = await getUsers();
-    const orders = users.flatMap((u) =>
-      (u.orders || []).map((o) => ({ ...o, userId: u.id }))
-    );
-    res.json(orders);
+    const r = await axios.get(`${JSON_SERVER}/orders`, { params: req.query });
+    res.json(r.data);
   } catch (err) {
+    console.error("GET /orders failed:", err.message);
     res.status(500).json({ error: "Failed to fetch orders" });
   }
 });
 
 /* ─────────────────────────────────────────
    ➕ CREATE ORDER
+   - Generates safe incremental ID server-side
+   - Saves to global orders collection
+   - Also embeds in user if userId is present
+   - Handles guests (null userId) without error
    ⚠️  Must be defined BEFORE generic /:resource
 ───────────────────────────────────────── */
 app.post("/orders", async (req, res) => {
   try {
     const newOrder = req.body;
-    const users = await getUsers();
-    const user = users.find((u) => u.id === newOrder.userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    user.orders = user.orders || [];
-    user.orders.push(newOrder);
-    await updateUser(user);
+
+    // 🔹 Always generate the ID server-side — never trust client ID
+    newOrder.id = await generateOrderId();
+    console.log(`🧾 Assigning order ID: ${newOrder.id}`);
+
+    // 1. Save to the global orders collection
+    const savedRes = await axios.post(`${JSON_SERVER}/orders`, newOrder);
+    const savedOrder = savedRes.data;
+
+    // 2. If logged-in user, also embed inside user record
+    if (newOrder.userId) {
+      try {
+        const users = await getUsers();
+        const user = users.find((u) => u.id === newOrder.userId);
+        if (user) {
+          user.orders = user.orders || [];
+          user.orders.push(savedOrder);
+          await updateUser(user);
+        }
+      } catch (embedErr) {
+        // Don't fail the whole order if user embedding fails
+        console.warn("Could not embed order in user:", embedErr.message);
+      }
+    }
+
     broadcast("ordersUpdated");
-    res.json(newOrder);
+    io.emit("data-change", {
+      resource: "orders",
+      action: "created",
+      payload: savedOrder
+    });
+    res.json(savedOrder);
   } catch (err) {
+    console.error("POST /orders failed:", err.message);
+    console.error("json-server response:", err.response?.status, err.response?.data);
     res.status(500).json({ error: "Failed to create order" });
   }
 });
@@ -117,23 +183,44 @@ app.patch("/orders/:orderId/item", async (req, res) => {
   try {
     const { orderId } = req.params;
     const { itemIndex, status } = req.body;
-    const users = await getUsers();
-    for (const user of users) {
-      const order = user.orders?.find((o) => o.id === orderId);
-      if (order) {
-        if (!order.items[itemIndex])
-          return res.status(400).json({ error: "Invalid item index" });
-        order.items[itemIndex].status = status;
-        const allDone = order.items.every((i) => i.status === "completed");
-        if (allDone) order.status = "completed";
-        order.updatedAt = new Date().toISOString();
-        await updateUser(user);
-        io.emit("data-change", { resource: "orders", action: "updated" });
-        return res.json({ success: true, order });
+
+    const orderRes = await axios.get(`${JSON_SERVER}/orders/${orderId}`);
+    const order = orderRes.data;
+
+    if (!order) return res.status(404).json({ error: "Order not found" });
+    if (!order.items[itemIndex])
+      return res.status(400).json({ error: "Invalid item index" });
+
+    order.items[itemIndex].status = status;
+    const allDone = order.items.every((i) => i.status === "completed");
+    if (allDone) order.status = "completed";
+    order.updatedAt = new Date().toISOString();
+
+    await axios.put(`${JSON_SERVER}/orders/${orderId}`, order);
+
+    // Sync into user record if userId present
+    if (order.userId) {
+      try {
+        const users = await getUsers();
+        const user = users.find((u) => u.id === order.userId);
+        if (user) {
+          const userOrder = user.orders?.find((o) => o.id === orderId);
+          if (userOrder) {
+            userOrder.items[itemIndex].status = status;
+            if (allDone) userOrder.status = "completed";
+            userOrder.updatedAt = order.updatedAt;
+            await updateUser(user);
+          }
+        }
+      } catch (syncErr) {
+        console.warn("Could not sync item status to user:", syncErr.message);
       }
     }
-    res.status(404).json({ error: "Order not found" });
+
+    io.emit("data-change", { resource: "orders", action: "updated" });
+    return res.json({ success: true, order });
   } catch (err) {
+    console.error("PATCH /orders/:orderId/item failed:", err.message);
     res.status(500).json({ error: "Failed to update item" });
   }
 });
@@ -145,20 +232,41 @@ app.patch("/orders/:orderId/status", async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
-    const users = await getUsers();
-    for (const user of users) {
-      const order = user.orders?.find((o) => o.id === orderId);
-      if (order) {
-        order.status = status;
-        order.items = order.items.map((i) => ({ ...i, status }));
-        order.updatedAt = new Date().toISOString();
-        await updateUser(user);
-        broadcast("ordersUpdated");
-        return res.json(order);
+
+    const orderRes = await axios.get(`${JSON_SERVER}/orders/${orderId}`);
+    const order = orderRes.data;
+
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    order.status = status;
+    order.items = order.items.map((i) => ({ ...i, status }));
+    order.updatedAt = new Date().toISOString();
+
+    await axios.put(`${JSON_SERVER}/orders/${orderId}`, order);
+
+    // Sync into user record if userId present
+    if (order.userId) {
+      try {
+        const users = await getUsers();
+        const user = users.find((u) => u.id === order.userId);
+        if (user) {
+          const userOrder = user.orders?.find((o) => o.id === orderId);
+          if (userOrder) {
+            userOrder.status = status;
+            userOrder.items = userOrder.items.map((i) => ({ ...i, status }));
+            userOrder.updatedAt = order.updatedAt;
+            await updateUser(user);
+          }
+        }
+      } catch (syncErr) {
+        console.warn("Could not sync status to user:", syncErr.message);
       }
     }
-    res.status(404).json({ error: "Order not found" });
+
+    broadcast("ordersUpdated");
+    return res.json(order);
   } catch (err) {
+    console.error("PATCH /orders/:orderId/status failed:", err.message);
     res.status(500).json({ error: "Failed to update order" });
   }
 });
@@ -168,10 +276,13 @@ app.patch("/orders/:orderId/status", async (req, res) => {
    ⚠️  These must come AFTER all specific routes
 ───────────────────────────────────────── */
 
-// GET all
+// GET all (supports query strings like ?_sort=id&_order=desc&_limit=1)
 app.get("/:resource", async (req, res) => {
   try {
-    const r = await axios.get(`${JSON_SERVER}/${req.params.resource}`);
+    const r = await axios.get(
+      `${JSON_SERVER}/${req.params.resource}`,
+      { params: req.query }
+    );
     res.json(r.data);
   } catch (err) {
     console.error("GET ERROR:", err.message || err);
@@ -203,6 +314,25 @@ app.post("/:resource", async (req, res) => {
       action: "created",
       payload: r.data
     });
+
+    // 🔔 Notify admin panel for new bookings
+    const BOOKING_META = {
+      eventBookings:  { label: "New event booking",      route: "/event-bookings" },
+      reservations:   { label: "New reservation",         route: "/reservations"   },
+      celebrations:   { label: "New celebration booking", route: "/celebrations"   },
+      cateringOrders: { label: "New catering order",      route: "/catering"       },
+      preBookings:    { label: "New pre-booking",         route: "/pre-bookings"   },
+    };
+    const meta = BOOKING_META[req.params.resource];
+    if (meta) {
+      const name = req.body.name || req.body.userName || "";
+      io.emit("new-booking", {
+        resource: req.params.resource,
+        message: name ? `${meta.label} — ${name}` : meta.label,
+        route: meta.route,
+      });
+    }
+
     res.json(r.data);
   } catch (err) {
     res.status(500).json({ error: "Failed to create resource" });
@@ -238,10 +368,66 @@ app.put("/:resource", async (req, res) => {
   }
 });
 
+// HELPER: recursively strip all null values from any object/array
+function stripNulls(value) {
+  if (Array.isArray(value)) {
+    return value.map(stripNulls);
+  }
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([, v]) => v !== null)
+        .map(([k, v]) => [k, stripNulls(v)])
+    );
+  }
+  return value;
+}
+
+// HELPER: deep-check if an object contains any null anywhere
+function hasNulls(value) {
+  if (value === null) return true;
+  if (Array.isArray(value)) return value.some(hasNulls);
+  if (typeof value === "object" && value !== null) {
+    return Object.values(value).some(hasNulls);
+  }
+  return false;
+}
+
 // DELETE by id
+// json-server scans ALL collections for FK references on every DELETE.
+// Any null — even nested inside items[] — causes a cascade crash.
+// Fix: deep-strip all nulls from every collection before issuing the DELETE.
 app.delete("/:resource/:id", async (req, res) => {
   const { resource, id } = req.params;
   try {
+    // Step 1 — get all collection names from json-server root
+    const rootRes = await axios.get(`${JSON_SERVER}`);
+    const collectionNames = Object.keys(rootRes.data || {});
+
+    // Step 2 — deep-clean nulls from every array collection
+    await Promise.allSettled(
+      collectionNames.map(async (col) => {
+        try {
+          const colRes = await axios.get(`${JSON_SERVER}/${col}`);
+          const items = colRes.data;
+          if (!Array.isArray(items)) return;
+
+          // Only update records that actually have nulls (shallow or nested)
+          const dirtyItems = items.filter(hasNulls);
+
+          await Promise.allSettled(
+            dirtyItems.map((item) => {
+              const cleaned = stripNulls(item);
+              return axios.put(`${JSON_SERVER}/${col}/${item.id}`, cleaned);
+            })
+          );
+        } catch {
+          // skip non-array collections like grooming, mise, kitchenAssign
+        }
+      })
+    );
+
+    // Step 3 — now safe to delete
     await axios.delete(`${JSON_SERVER}/${resource}/${id}`);
     io.emit("data-change", { resource, action: "deleted", id, payload: { id } });
     res.json({ success: true, id });
@@ -264,6 +450,7 @@ function broadcast(event) {
 ───────────────────────────────────────── */
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📦 Proxying to json-server at ${JSON_SERVER}`);
 });
 
 /* ─────────────────────────────────────────
@@ -272,8 +459,6 @@ server.listen(PORT, "0.0.0.0", () => {
    down after 15 min of inactivity.
    Set SELF_URL env var on Render to your
    Express server's public URL.
-   Set DATA_URL env var to your data
-   service's public URL.
 ───────────────────────────────────────── */
 const SELF_URL = process.env.SELF_URL || null;
 const DATA_URL = process.env.JSON_SERVER_URL || null;
