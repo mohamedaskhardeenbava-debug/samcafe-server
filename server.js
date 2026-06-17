@@ -5,8 +5,6 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const axios = require("axios");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(cors());
@@ -21,7 +19,6 @@ const io = new Server(server, {
 
 const JSON_SERVER = process.env.JSON_SERVER_URL || "http://localhost:5000";
 const PORT = process.env.PORT || 4000;
-const JWT_SECRET = process.env.JWT_SECRET || "change_this_secret";
 
 /* ─────────────────────────────────────────
    BELL STATE (in-memory)
@@ -271,104 +268,6 @@ app.patch("/orders/:orderId/status", async (req, res) => {
   } catch (err) {
     console.error("PATCH /orders/:orderId/status failed:", err.message);
     res.status(500).json({ error: "Failed to update order" });
-  }
-});
-
-/* ─────────────────────────────────────────
-   🔐 ADMIN AUTH
-   ⚠️  Must be defined BEFORE generic /:resource
-───────────────────────────────────────── */
-
-// LOGIN
-app.post("/auth/login", async (req, res) => {
-  try {
-    const { userId, password } = req.body;
-    if (!userId || !password) {
-      return res.status(400).json({ error: "userId and password are required" });
-    }
-
-    const r = await axios.get(`${JSON_SERVER}/admins`, {
-      params: { userId }
-    });
-    const admin = (r.data || [])[0];
-
-    if (!admin) {
-      return res.status(401).json({ error: "Invalid userId or password" });
-    }
-
-    const match = await bcrypt.compare(password, admin.password);
-    if (!match) {
-      return res.status(401).json({ error: "Invalid userId or password" });
-    }
-
-    const token = jwt.sign(
-      { id: admin.id, userId: admin.userId },
-      JWT_SECRET,
-      { expiresIn: "8h" }
-    );
-
-    res.json({
-      token,
-      admin: { id: admin.id, userId: admin.userId, name: admin.name }
-    });
-  } catch (err) {
-    console.error("Login failed:", err.message);
-    res.status(500).json({ error: "Login failed" });
-  }
-});
-
-// SIGNUP
-app.post("/auth/signup", async (req, res) => {
-  try {
-    const { userId, password, name } = req.body;
-    if (!userId || !password) {
-      return res.status(400).json({ error: "userId and password are required" });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
-    }
-
-    const existingRes = await axios.get(`${JSON_SERVER}/admins`, {
-      params: { userId }
-    });
-    if ((existingRes.data || []).length > 0) {
-      return res.status(409).json({ error: "User already exists" });
-    }
-
-    const allAdmins = await axios.get(`${JSON_SERVER}/admins`);
-    const maxNum = Math.max(
-      0,
-      ...allAdmins.data.map(a => parseInt(a.id?.replace("admin_", "")) || 0)
-    );
-    const newId = `admin_${String(maxNum + 1).padStart(5, "0")}`;
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const saved = await axios.post(`${JSON_SERVER}/admins`, {
-      id: newId,
-      userId,
-      password: hashedPassword,
-      name: name || userId
-    });
-
-    res.json({ success: true, userId: saved.data.userId });
-  } catch (err) {
-    console.error("Signup failed:", err.message);
-    res.status(500).json({ error: "Signup failed" });
-  }
-});
-
-// VERIFY TOKEN
-app.get("/auth/verify", (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ valid: false });
-  }
-  try {
-    const decoded = jwt.verify(authHeader.split(" ")[1], JWT_SECRET);
-    res.json({ valid: true, admin: decoded });
-  } catch {
-    res.status(401).json({ valid: false });
   }
 });
 

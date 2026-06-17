@@ -5,6 +5,8 @@
 /.pnp
 .pnp.js
 .env
+.seed.js
+.db.json
 
 # testing
 /coverage
