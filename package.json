@@ -1,22 +1,25 @@
 {
   "name": "samcafe-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Sam Cafe backend — Express + MongoDB Atlas + Socket.io",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node seed.js",
+    "fix-ids": "node fixDuplicateSubCategoryIds.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "axios": "^1.13.6",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "json-server": "^0.17.4",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.0",
     "socket.io": "^4.8.3"
   }
 }
