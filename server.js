@@ -8,7 +8,6 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-// Force public DNS resolvers — fixes SRV lookup failures on home routers / some ISPs
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 /* ─────────────────────────────────────────
