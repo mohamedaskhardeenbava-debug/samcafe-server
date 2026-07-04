@@ -26,12 +26,33 @@ const PORT = process.env.PORT || 4000;
 let activeBells = {};
 
 /* ─────────────────────────────────────────
+   PRINTER BRIDGE RELAY STATE
+   The local print-bridge (running next to the physical Epson
+   printer) connects out to this server as a normal socket.io
+   client and registers itself. Admin/user panels never talk to
+   it directly — everything is relayed through here, so no public
+   IP/port/tunnel is ever needed on the cafe's local network.
+───────────────────────────────────────── */
+let printerSocketId = null;
+
+// jobId -> { requesterSocketId, timeout }
+const pendingPrintJobs = new Map();
+const PRINT_JOB_TIMEOUT_MS = 15000;
+
+function isPrinterOnline() {
+  return !!(printerSocketId && io.sockets.sockets.get(printerSocketId));
+}
+
+/* ─────────────────────────────────────────
    SOCKET CONNECTION
 ───────────────────────────────────────── */
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
 
   socket.emit("bell-sync", activeBells);
+
+  // Tell the newly connected client current printer status right away
+  socket.emit("printer:status", { online: isPrinterOnline() });
 
   socket.on("bell-ring", (payload) => {
     const { tableNo } = payload || {};
@@ -57,8 +78,80 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("theme-update", payload);
   });
 
+  /* ── Printer bridge registers itself ──
+     Payload: { secret } — a shared secret so random clients can't
+     claim to be the printer. Set PRINTER_BRIDGE_SECRET in .env on
+     both this server and the local bridge machine. */
+  socket.on("printer:register", (payload) => {
+    const { secret } = payload || {};
+    if (process.env.PRINTER_BRIDGE_SECRET && secret !== process.env.PRINTER_BRIDGE_SECRET) {
+      console.warn(`Printer bridge auth failed from ${socket.id}`);
+      socket.emit("printer:register-ack", { ok: false, error: "Invalid secret" });
+      return;
+    }
+    printerSocketId = socket.id;
+    socket.data.isPrinterBridge = true;
+    console.log(`🖨️  Printer bridge registered: ${socket.id}`);
+    socket.emit("printer:register-ack", { ok: true });
+    io.emit("printer:status", { online: true });
+  });
+
+  // Any client (admin/user panel) asking for current printer status
+  socket.on("printer:status-check", () => {
+    socket.emit("printer:status", { online: isPrinterOnline() });
+  });
+
+  /* ── Panel requests a print job ──
+     Payload: { jobId, jobType: "kot" | "bill" | "test", order }
+     jobId is generated client-side (e.g. crypto.randomUUID()) so the
+     requester can match the eventual result. */
+  socket.on("printer:print", (payload) => {
+    const { jobId, jobType, order } = payload || {};
+    if (!jobId || !jobType) {
+      socket.emit("printer:result", { jobId, success: false, error: "Missing jobId or jobType" });
+      return;
+    }
+    if (!isPrinterOnline()) {
+      socket.emit("printer:result", { jobId, success: false, error: "Printer bridge is offline" });
+      return;
+    }
+
+    pendingPrintJobs.set(jobId, { requesterSocketId: socket.id });
+
+    // Safety timeout in case the bridge never responds
+    const timer = setTimeout(() => {
+      if (pendingPrintJobs.has(jobId)) {
+        pendingPrintJobs.delete(jobId);
+        io.to(socket.id).emit("printer:result", {
+          jobId,
+          success: false,
+          error: "Print job timed out — printer may be offline or unreachable",
+        });
+      }
+    }, PRINT_JOB_TIMEOUT_MS);
+    pendingPrintJobs.get(jobId).timeout = timer;
+
+    io.to(printerSocketId).emit("printer:print", { jobId, jobType, order });
+  });
+
+  /* ── Bridge reports the outcome of a job ──
+     Payload: { jobId, success, message, error } */
+  socket.on("printer:result", (payload) => {
+    const { jobId } = payload || {};
+    const job = pendingPrintJobs.get(jobId);
+    if (!job) return; // already timed out or unknown job
+    clearTimeout(job.timeout);
+    pendingPrintJobs.delete(jobId);
+    io.to(job.requesterSocketId).emit("printer:result", payload);
+  });
+
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
+    if (socket.id === printerSocketId) {
+      printerSocketId = null;
+      console.log("🖨️  Printer bridge disconnected");
+      io.emit("printer:status", { online: false });
+    }
   });
 });
 
@@ -317,11 +410,11 @@ app.post("/:resource", async (req, res) => {
 
     // 🔔 Notify admin panel for new bookings
     const BOOKING_META = {
-      eventBookings:  { label: "New event booking",      route: "/event-bookings" },
-      reservations:   { label: "New reservation",         route: "/reservations"   },
-      celebrations:   { label: "New celebration booking", route: "/celebrations"   },
-      cateringOrders: { label: "New catering order",      route: "/catering"       },
-      preBookings:    { label: "New pre-booking",         route: "/pre-bookings"   },
+      eventBookings: { label: "New event booking", route: "/event-bookings" },
+      reservations: { label: "New reservation", route: "/reservations" },
+      celebrations: { label: "New celebration booking", route: "/celebrations" },
+      cateringOrders: { label: "New catering order", route: "/catering" },
+      preBookings: { label: "New pre-booking", route: "/pre-bookings" },
     };
     const meta = BOOKING_META[req.params.resource];
     if (meta) {
