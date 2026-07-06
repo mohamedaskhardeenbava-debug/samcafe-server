@@ -17,11 +17,22 @@ const app = express();
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: "*", methods: ["GET", "POST", "PUT", "PATCH", "DELETE"] },
-  transports: ["websocket"],
-  upgrade: false,
+  // Allow the default polling->websocket upgrade path instead of forcing
+  // websocket-only. A pure-WS connection has no fallback, so any brief
+  // network blip (flaky cafe wifi/router) kills it outright instead of
+  // degrading gracefully — that was causing the frequent connect/
+  // disconnect cycles for the printer bridge seen in the logs.
 });
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://sam-cafe-admin.vercel.app",
+    "https://samcafe.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true
+}));
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -464,8 +475,29 @@ let printerSocketId = null;
 const pendingPrintJobs = new Map();
 const PRINT_JOB_TIMEOUT_MS = 15000;
 
+// If the bridge just dropped, it's usually mid-reconnect a moment later
+// (e.g. brief wifi blip). Give it a short grace window to re-register
+// before telling the requester it's offline, instead of failing instantly.
+const PRINTER_RECONNECT_GRACE_MS = 4000;
+let printerOnlineWaiters = []; // resolve callbacks waiting on the bridge to (re)register
+
 function isPrinterOnline() {
   return !!(printerSocketId && io.sockets.sockets.get(printerSocketId));
+}
+
+function waitForPrinterOnline(timeoutMs) {
+  if (isPrinterOnline()) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      printerOnlineWaiters = printerOnlineWaiters.filter((w) => w !== onOnline);
+      resolve(false);
+    }, timeoutMs);
+    function onOnline() {
+      clearTimeout(timer);
+      resolve(true);
+    }
+    printerOnlineWaiters.push(onOnline);
+  });
 }
 
 io.on("connection", (socket) => {
@@ -511,6 +543,11 @@ io.on("connection", (socket) => {
     console.log(`Printer bridge registered: ${socket.id}`);
     socket.emit("printer:register-ack", { ok: true });
     io.emit("printer:status", { online: true });
+
+    // Wake up any print requests that were waiting out the grace period
+    const waiters = printerOnlineWaiters;
+    printerOnlineWaiters = [];
+    waiters.forEach((w) => w());
   });
 
   // Any client (admin/user panel) asking for current printer status
@@ -522,15 +559,20 @@ io.on("connection", (socket) => {
      Payload: { jobId, jobType: "kot" | "bill" | "test", order }
      jobId is generated client-side (e.g. crypto.randomUUID()) so the
      requester can match the eventual result. */
-  socket.on("printer:print", (payload) => {
+  socket.on("printer:print", async (payload) => {
     const { jobId, jobType, order } = payload || {};
     if (!jobId || !jobType) {
       socket.emit("printer:result", { jobId, success: false, error: "Missing jobId or jobType" });
       return;
     }
     if (!isPrinterOnline()) {
-      socket.emit("printer:result", { jobId, success: false, error: "Printer bridge is offline" });
-      return;
+      // Don't fail instantly — the bridge may be mid-reconnect after a
+      // brief drop. Wait a short grace period for it to come back.
+      const cameBackOnline = await waitForPrinterOnline(PRINTER_RECONNECT_GRACE_MS);
+      if (!cameBackOnline) {
+        socket.emit("printer:result", { jobId, success: false, error: "Printer bridge is offline" });
+        return;
+      }
     }
 
     pendingPrintJobs.set(jobId, { requesterSocketId: socket.id });
