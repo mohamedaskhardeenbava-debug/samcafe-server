@@ -395,6 +395,18 @@ app.get("/:resource/:id", async (req, res) => {
   }
 });
 
+// Resources that drive the combo builder (admin) + combo reel (user panel).
+// Any create/update/delete on these gets an extra dedicated "combo-update"
+// event so both panels can react without having to filter generic
+// "data-change" events by resource name.
+const COMBO_RESOURCES = new Set(["combo_offers", "comboSectionConfig"]);
+
+function broadcastComboUpdate(resource, action, payload, id) {
+  if (!COMBO_RESOURCES.has(resource)) return;
+  console.log(`🍔 Combo update broadcast: ${resource} ${action}`);
+  io.emit("combo-update", { resource, action, payload, id });
+}
+
 // POST
 app.post("/:resource", async (req, res) => {
   try {
@@ -407,6 +419,7 @@ app.post("/:resource", async (req, res) => {
       action: "created",
       payload: r.data
     });
+    broadcastComboUpdate(req.params.resource, "created", r.data);
 
     // 🔔 Notify admin panel for new bookings
     const BOOKING_META = {
@@ -444,6 +457,7 @@ app.put("/:resource/:id", async (req, res) => {
       action: "updated",
       payload: r.data
     });
+    broadcastComboUpdate(req.params.resource, "updated", r.data, req.params.id);
     res.json(r.data);
   } catch (err) {
     res.status(500).json({ error: "Failed to update resource" });
@@ -455,6 +469,12 @@ app.put("/:resource", async (req, res) => {
   try {
     const data = req.body;
     await axios.put(`${JSON_SERVER}/${req.params.resource}`, data);
+    io.emit("data-change", {
+      resource: req.params.resource,
+      action: "updated",
+      payload: data
+    });
+    broadcastComboUpdate(req.params.resource, "updated", data);
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: "Bulk update failed" });
@@ -523,6 +543,7 @@ app.delete("/:resource/:id", async (req, res) => {
     // Step 3 — now safe to delete
     await axios.delete(`${JSON_SERVER}/${resource}/${id}`);
     io.emit("data-change", { resource, action: "deleted", id, payload: { id } });
+    broadcastComboUpdate(resource, "deleted", { id }, id);
     res.json({ success: true, id });
   } catch (err) {
     console.error(`DELETE /${resource}/${id} failed:`, err.message);
