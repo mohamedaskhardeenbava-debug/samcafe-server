@@ -1,4 +1,4 @@
-//Testing Branch MongoDB
+﻿//Testing Branch MongoDB
 require("dotenv").config();
 const dns = require("dns");
 const express = require("express");
@@ -26,9 +26,9 @@ const { hasPermission } = permissionsModule;
 
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    APP + SOCKET SETUP
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const app = express();
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
@@ -36,7 +36,7 @@ const io = new Server(httpServer, {
   // Allow the default polling->websocket upgrade path instead of forcing
   // websocket-only. A pure-WS connection has no fallback, so any brief
   // network blip (flaky cafe wifi/router) kills it outright instead of
-  // degrading gracefully — that was causing the frequent connect/
+  // degrading gracefully â€” that was causing the frequent connect/
   // disconnect cycles for the printer bridge seen in the logs.
 });
 
@@ -74,9 +74,9 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-/* ─────────────────────────────────────────
-   MONGOOSE — GENERIC SCHEMA
-───────────────────────────────────────── */
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   MONGOOSE â€” GENERIC SCHEMA
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const anySchema = new mongoose.Schema(
   {},
   { strict: false, timestamps: false, versionKey: false, id: false }
@@ -87,35 +87,20 @@ function getModel(collectionName) {
   if (modelCache[collectionName]) return modelCache[collectionName];
   const model = mongoose.model(collectionName, anySchema, collectionName);
   modelCache[collectionName] = model;
-  // Every collection is queried by venueId on nearly every request (venue
-  // scoping) and by the app-level `id` field on every single-doc lookup —
-  // without these, Mongo falls back to a full collection scan on each call.
-  // createIndex() is a no-op if the index already exists, so this is safe
-  // to run on every boot; it runs in the background and doesn't block
-  // reads/writes against the collection while building.
-  model.collection.createIndex({ venueId: 1 }).catch(() => {});
-  model.collection.createIndex({ id: 1 }).catch(() => {});
-  if (collectionName === "orders") {
-    // Orders is the largest collection by far and is always read as one
-    // big list per venue, most-recent-first — a compound index lets Mongo
-    // satisfy that access pattern directly instead of scanning + sorting
-    // in memory.
-    model.collection.createIndex({ venueId: 1, createdAt: -1 }).catch(() => {});
-  }
   return model;
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    CUSTOMER SESSIONS (user panel)
 
    Mirrors the admin-panel session pattern in auth.js (httpOnly cookie +
    server-side session doc, TTL-cleaned) but as its own collection/cookie
    so a customer session and a staff session can coexist in the same
    browser without clashing. Previously the user panel only stored a raw
-   userId in localStorage with no server-side session at all — anyone
+   userId in localStorage with no server-side session at all â€” anyone
    could set that value to any user's id and "become" them, and a reload
    only worked as long as GET /users/:id happened to succeed.
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const customerSessionSchema = new mongoose.Schema(
   {
     sessionId: { type: String, required: true, unique: true },
@@ -132,7 +117,7 @@ customerSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 const CustomerSession = mongoose.model("CustomerSession", customerSessionSchema, "customerSessions");
 
 const CUSTOMER_SESSION_COOKIE = "samcafe_uid";
-const CUSTOMER_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days — customers expect to stay logged in
+const CUSTOMER_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days â€” customers expect to stay logged in
 
 function customerCookieOpts() {
   const isProd = process.env.NODE_ENV === "production";
@@ -159,7 +144,7 @@ async function createCustomerSession(userId, req, res) {
 }
 
 /**
- * requireCustomerAuth — validates the samcafe_uid cookie against
+ * requireCustomerAuth â€” validates the samcafe_uid cookie against
  * customerSessions, attaches req.customerUserId. Used by /auth/me and
  * /auth/logout; the rest of the /users/* CRUD routes stay open for now
  * (unchanged from prior behavior) so this is additive, not a breaking
@@ -191,10 +176,10 @@ async function requireCustomerAuth(req, res, next) {
   }
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    COLLECTION REGISTRY
 
-   ARRAY collections   → normal REST CRUD
+   ARRAY collections   â†’ normal REST CRUD
                           GET /col           list all
                           GET /col/:id       single doc by app "id" field
                           POST /col          create
@@ -202,13 +187,13 @@ async function requireCustomerAuth(req, res, next) {
                           PATCH /col/:id     partial update
                           DELETE /col/:id    remove
 
-   SINGLETON collections → one document per collection, stored with id="singleton"
+   SINGLETON collections â†’ one document per collection, stored with id="singleton"
                           GET /col           returns the object directly (or {})
                           PUT /col           full replace
                           PATCH /col         partial merge
 
    Source of truth: your MongoDB Atlas collections
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const ARRAY_COLLECTIONS = [
   "users",
   "categories",
@@ -238,7 +223,7 @@ const ARRAY_COLLECTIONS = [
   "tablePreferences",
 ];
 
-// Plain objects in db.json — stored as one doc with id="singleton"
+// Plain objects in db.json â€” stored as one doc with id="singleton"
 const SINGLETON_COLLECTIONS = [
   "grooming",
   "mise",
@@ -248,12 +233,11 @@ const SINGLETON_COLLECTIONS = [
   "serviceGrooming",
   "serviceMise",
   "comboSectionConfig",
-  "categoryCards",
 ];
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    HELPERS
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 /** Strip MongoDB internal fields from a lean doc before sending to client. */
 function stripMeta(doc) {
@@ -291,7 +275,7 @@ function notifyNewBooking(resource, body) {
   const name = body.name || body.userName || "";
   io.emit("new-booking", {
     resource,
-    message: name ? `${meta.label} — ${name}` : meta.label,
+    message: name ? `${meta.label} â€” ${name}` : meta.label,
     route: meta.route,
   });
 }
@@ -324,9 +308,9 @@ async function generateOrderId() {
   return candidate;
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    AUTH MIDDLEWARE
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function requireAuth(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
@@ -339,18 +323,18 @@ function requireAuth(req, res, next) {
   }
 }
 
-/* ─────────────────────────────────────────
-   PHASE-4 — STAFF / ROLE-BASED AUTH
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   PHASE-4 â€” STAFF / ROLE-BASED AUTH
    Mounted separately from the legacy customer
    /auth/* routes below (which operate on the
    `users` collection, not `admins`).
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 app.use("/staff-auth", authRouter);
 app.use("/todos", todoRouter);
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    LEGACY / CUSTOMER AUTH ROUTES
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 // POST /auth/register
 app.post("/auth/register", async (req, res) => {
@@ -401,7 +385,7 @@ app.post("/auth/login", async (req, res) => {
   }
 });
 
-// POST /auth/session-login — mobile-number lookup, matching how the user
+// POST /auth/session-login â€” mobile-number lookup, matching how the user
 // panel (Welcome.js) actually authenticates customers (no password).
 // Issues an httpOnly cookie session instead of the frontend trusting a
 // raw userId in localStorage.
@@ -427,7 +411,7 @@ app.post("/auth/session-login", async (req, res) => {
   }
 });
 
-// POST /auth/session-signup — first-time mobile signup, also used by the
+// POST /auth/session-signup â€” first-time mobile signup, also used by the
 // user panel. Creates the user doc, then immediately starts a session
 // the same way session-login does, so signup logs the customer straight in.
 app.post("/auth/session-signup", async (req, res) => {
@@ -457,7 +441,7 @@ app.post("/auth/session-signup", async (req, res) => {
   }
 });
 
-// GET /auth/me — called on app mount to restore the logged-in customer
+// GET /auth/me â€” called on app mount to restore the logged-in customer
 // from the httpOnly cookie, so a page reload keeps them signed in as
 // long as the session is valid server-side (rather than trusting
 // whatever id happens to be sitting in localStorage).
@@ -476,7 +460,7 @@ app.get("/auth/me", requireCustomerAuth, async (req, res) => {
   }
 });
 
-// POST /auth/logout — clears the customer session, both server-side
+// POST /auth/logout â€” clears the customer session, both server-side
 // (so the cookie can't be replayed) and the cookie itself.
 app.post("/auth/logout", async (req, res) => {
   try {
@@ -490,35 +474,14 @@ app.post("/auth/logout", async (req, res) => {
   }
 });
 
-/* ─────────────────────────────────────────
-   GET /orders/mine — a logged-in customer's own order history.
-   Registered BEFORE the generic /orders loop (which requires admin
-   auth) so this customer-facing route takes priority. Reads from the
-   orders collection directly (rather than the embedded copy on the
-   user doc) so it stays correct even if an order is later updated
-   (status changes, etc.) after being embedded at creation time.
-───────────────────────────────────────── */
-app.get("/orders/mine", requireCustomerAuth, async (req, res) => {
-  try {
-    const docs = await getModel("orders")
-      .find({ userId: req.customerUserId })
-      .sort({ createdAt: -1 })
-      .lean();
-    res.json(docs.map(stripMeta));
-  } catch (err) {
-    console.error("GET /orders/mine", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ─────────────────────────────────────────
-   ORDERS — dedicated create route
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   ORDERS â€” dedicated create route
    Registered BEFORE the generic loop so it
    takes priority for POST /orders.
    Assigns a real order id server-side and
    embeds the order into the user doc for
    per-user order history / revenue stats.
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 app.post("/orders", async (req, res) => {
   try {
     const newOrder = { ...req.body };
@@ -556,25 +519,25 @@ app.post("/orders", async (req, res) => {
   }
 });
 
-/* ─────────────────────────────────────────
-   ARRAY COLLECTION ROUTES — venue-scoped + permission-matrix-gated
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   ARRAY COLLECTION ROUTES â€” venue-scoped + permission-matrix-gated
 
    Every collection here is multi-tenant: every document carries a
    venueId, every request is authenticated, and every read/write is
    checked against the permission matrix (permissions.js) for the
    caller's roleTitle + this module. Super Admin always passes and
    can optionally scope to one venue via ?venueId= (the venue
-   switcher) — omit it to see all venues combined.
+   switcher) â€” omit it to see all venues combined.
 
    Non-Super-Admin callers are hard-scoped to their own venueId
-   (req.admin.venueId) on every op — they can never read, create,
+   (req.admin.venueId) on every op â€” they can never read, create,
    update, or delete another venue's data, even if they pass a
    different venueId explicitly.
 
    Every write is recorded to the audit log (auditLog.js).
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
-/** requirePerm(name, action) — auth + permission-matrix check for a given module. */
+/** requirePerm(name, action) â€” auth + permission-matrix check for a given module. */
 function requirePerm(name, action) {
   return async (req, res, next) => {
     if (!req.admin) return res.status(401).json({ error: "Not logged in" });
@@ -585,7 +548,7 @@ function requirePerm(name, action) {
 }
 
 /**
- * scopeFilter(req) — the venueId filter to apply to a query.
+ * scopeFilter(req) â€” the venueId filter to apply to a query.
  *   Super Admin + no ?venueId=  -> {} (see everything)
  *   Super Admin + ?venueId=X    -> { venueId: X }
  *   Everyone else               -> { venueId: req.admin.venueId } (forced)
@@ -609,7 +572,7 @@ function scopeVenueForCreate(req) {
 ARRAY_COLLECTIONS.forEach((name) => {
   const base = `/${name}`;
 
-  // GET /collection — list, scoped to caller's venue (or filtered/all for Super Admin)
+  // GET /collection â€” list, scoped to caller's venue (or filtered/all for Super Admin)
   app.get(base, requireAdminAuth, requirePerm(name, "read"), async (req, res) => {
     try {
       const docs = await getModel(name).find(scopeFilter(req)).lean();
@@ -620,7 +583,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
     }
   });
 
-  // GET /collection/:id — single document by app "id" field, still venue-scoped
+  // GET /collection/:id â€” single document by app "id" field, still venue-scoped
   app.get(`${base}/:id`, requireAdminAuth, requirePerm(name, "read"), async (req, res) => {
     try {
       const Model = getModel(name);
@@ -638,7 +601,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
     }
   });
 
-  // POST /collection — create (orders has its own route above)
+  // POST /collection â€” create (orders has its own route above)
   if (name !== "orders") {
     app.post(base, requireAdminAuth, requirePerm(name, "write"), async (req, res) => {
       try {
@@ -661,7 +624,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
     });
   }
 
-  // PUT /collection/:id — full replace (upsert so PUT on new id creates it), venue-scoped
+  // PUT /collection/:id â€” full replace (upsert so PUT on new id creates it), venue-scoped
   app.put(`${base}/:id`, requireAdminAuth, requirePerm(name, "write"), async (req, res) => {
     try {
       const filter = { ...scopeFilter(req), id: req.params.id };
@@ -686,13 +649,13 @@ ARRAY_COLLECTIONS.forEach((name) => {
     }
   });
 
-  // PATCH /collection/:id — partial update, venue-scoped (never touches another venue's doc)
+  // PATCH /collection/:id â€” partial update, venue-scoped (never touches another venue's doc)
   app.patch(`${base}/:id`, requireAdminAuth, requirePerm(name, "write"), async (req, res) => {
     try {
       const filter = { ...scopeFilter(req), id: req.params.id };
       const before = await getModel(name).findOne(filter).lean();
       if (!before) return res.status(404).json({ error: "Not found" });
-      // venueId is never editable via PATCH body — reassigning a record to
+      // venueId is never editable via PATCH body â€” reassigning a record to
       // a different venue is a deliberate, separate operation if ever needed.
       const { venueId: _ignoredVenueId, ...patchBody } = req.body;
       const doc = await getModel(name)
@@ -708,7 +671,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
     }
   });
 
-  // DELETE /collection/:id — remove, venue-scoped
+  // DELETE /collection/:id â€” remove, venue-scoped
   app.delete(`${base}/:id`, requireAdminAuth, requirePerm(name, "write"), async (req, res) => {
     try {
       const filter = { ...scopeFilter(req), id: req.params.id };
@@ -725,8 +688,8 @@ ARRAY_COLLECTIONS.forEach((name) => {
   });
 });
 
-/* ─────────────────────────────────────────
-   SINGLETON COLLECTION ROUTES — now one-per-venue
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   SINGLETON COLLECTION ROUTES â€” now one-per-venue
 
    Previously these were global (a single doc with id="singleton").
    With multi-venue, each branch needs its own grooming/mise/assign
@@ -735,16 +698,16 @@ ARRAY_COLLECTIONS.forEach((name) => {
    is unchanged (still returns the bare object, not wrapped).
 
    `theme` is the one exception carried over from SINGLETON_COLLECTIONS
-   below — see the dedicated theme guard further down, which keeps it
+   below â€” see the dedicated theme guard further down, which keeps it
    truly global and Super-Admin-only, per the "theme stays global"
    decision.
 
-   GET    /collection   → returns the object for the caller's venue
+   GET    /collection   â†’ returns the object for the caller's venue
                            (or ?venueId= for Super Admin), or {} if unseeded
-   PUT    /collection   → full replace (upsert) for that venue
-   PATCH  /collection   → partial merge update (upsert) for that venue
-───────────────────────────────────────── */
-const GLOBAL_SINGLETONS = new Set(["theme", "categoryCards"]); // Super Admin only, not venue-scoped
+   PUT    /collection   â†’ full replace (upsert) for that venue
+   PATCH  /collection   â†’ partial merge update (upsert) for that venue
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+const GLOBAL_SINGLETONS = new Set(["theme"]); // Super Admin only, not venue-scoped
 const VENUE_SINGLETONS = SINGLETON_COLLECTIONS.filter((n) => !GLOBAL_SINGLETONS.has(n));
 
 function singletonIdFor(name, venueId) {
@@ -754,7 +717,7 @@ function singletonIdFor(name, venueId) {
 /** Which venueId a singleton read/write should target for this caller. */
 function singletonVenueId(req) {
   if (!req.admin) {
-    throw new Error("singletonVenueId called without req.admin — auth middleware did not run first");
+    throw new Error("singletonVenueId called without req.admin â€” auth middleware did not run first");
   }
   if (req.admin.roleGroup === "Super Admin") {
     return (req.query && req.query.venueId) || (req.body && req.body.venueId) || null;
@@ -822,37 +785,10 @@ VENUE_SINGLETONS.forEach((name) => {
   });
 });
 
-/* ─────────────────────────────────────────
-   CATEGORY CARDS — public read
-   The "special cards" row at the top of the user-panel Food Category
-   page (My Favourites, Crowd Picks, My Orders, Combos, Offers,
-   Events & Booking) is admin-configurable (name/image/enabled) via
-   the categoryCards singleton above, but the user panel is a public,
-   unauthenticated surface — it can't send an admin session cookie to
-   read it. This mirrors GET /orders/mine's approach of a dedicated
-   customer/public-facing route sitting alongside the admin-gated one.
-   Read-only; writes still go through the Super-Admin-gated
-   /categoryCards route below.
-───────────────────────────────────────── */
-app.get("/category-cards/public", async (req, res) => {
-  try {
-    const doc = await getModel("categoryCards").findOne({ id: "singleton" }).lean();
-    if (!doc) return res.json({});
-    const { _id, __v, id, ...rest } = doc;
-    res.json(rest);
-  } catch (err) {
-    console.error("GET /category-cards/public", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ─────────────────────────────────────────
-   THEME — stays global and Super-Admin-only (not venue-scoped), per
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+   THEME â€” stays global and Super-Admin-only (not venue-scoped), per
    the "one theme, controlled only by Super Admin" decision.
-   CATEGORY CARDS reuses the same global/Super-Admin-write shape for
-   its admin-panel-facing route (see the public read route above for
-   the user-panel-facing counterpart).
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 GLOBAL_SINGLETONS.forEach((name) => {
   const base = `/${name}`;
 
@@ -904,16 +840,16 @@ GLOBAL_SINGLETONS.forEach((name) => {
   });
 });
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    SOCKET.IO
-───────────────────────────────────────── */
-// In-memory table bell state (ephemeral — acceptable to lose on restart)
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// In-memory table bell state (ephemeral â€” acceptable to lose on restart)
 let activeBells = {};
 
-/* ── Printer bridge relay state ──
+/* â”€â”€ Printer bridge relay state â”€â”€
    The local print-bridge (running next to the physical Epson printer)
    connects out to this server as a normal socket.io client and
-   registers itself. Admin/user panels never talk to it directly —
+   registers itself. Admin/user panels never talk to it directly â€”
    everything is relayed through here, so no public IP/port/tunnel
    is ever needed on the cafe's local network. */
 let printerSocketId = null;
@@ -974,8 +910,8 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("theme-update", payload);
   });
 
-  /* ── Printer bridge registers itself ──
-     Payload: { secret } — a shared secret so random clients can't
+  /* â”€â”€ Printer bridge registers itself â”€â”€
+     Payload: { secret } â€” a shared secret so random clients can't
      claim to be the printer. Set PRINTER_BRIDGE_SECRET in .env on
      both this server and the local bridge machine. */
   socket.on("printer:register", (payload) => {
@@ -1002,7 +938,7 @@ io.on("connection", (socket) => {
     socket.emit("printer:status", { online: isPrinterOnline() });
   });
 
-  /* ── Panel requests a print job ──
+  /* â”€â”€ Panel requests a print job â”€â”€
      Payload: { jobId, jobType: "kot" | "bill" | "test", order }
      jobId is generated client-side (e.g. crypto.randomUUID()) so the
      requester can match the eventual result. */
@@ -1013,7 +949,7 @@ io.on("connection", (socket) => {
       return;
     }
     if (!isPrinterOnline()) {
-      // Don't fail instantly — the bridge may be mid-reconnect after a
+      // Don't fail instantly â€” the bridge may be mid-reconnect after a
       // brief drop. Wait a short grace period for it to come back.
       const cameBackOnline = await waitForPrinterOnline(PRINTER_RECONNECT_GRACE_MS);
       if (!cameBackOnline) {
@@ -1031,7 +967,7 @@ io.on("connection", (socket) => {
         io.to(socket.id).emit("printer:result", {
           jobId,
           success: false,
-          error: "Print job timed out — printer may be offline or unreachable",
+          error: "Print job timed out â€” printer may be offline or unreachable",
         });
       }
     }, PRINT_JOB_TIMEOUT_MS);
@@ -1040,7 +976,7 @@ io.on("connection", (socket) => {
     io.to(printerSocketId).emit("printer:print", { jobId, jobType, order });
   });
 
-  /* ── Bridge reports the outcome of a job ──
+  /* â”€â”€ Bridge reports the outcome of a job â”€â”€
      Payload: { jobId, success, message, error } */
   socket.on("printer:result", (payload) => {
     const { jobId } = payload || {};
@@ -1061,35 +997,22 @@ io.on("connection", (socket) => {
   });
 });
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    HEALTH CHECK
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 app.get("/health", (_req, res) => res.json({ status: "ok", ts: Date.now() }));
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    404 FALLBACK
-───────────────────────────────────────── */
-app.use(
-  "/venues",
-  venuesModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole, logAudit })
-);
-app.use(
-  "/permissions",
-  permissionsModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole, logAudit })
-);
-app.use(
-  "/audit-logs",
-  auditLogModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole })
-);
-
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 app.use((_req, res) => res.status(404).json({ error: "Route not found" }));
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    KEEP-ALIVE SELF-PING
    Prevents Render free tier from spinning
    down after 15 min of inactivity.
    Set SELF_URL in .env to enable.
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const SELF_URL = process.env.SELF_URL || null;
 if (SELF_URL) {
   setInterval(async () => {
@@ -1102,13 +1025,13 @@ if (SELF_URL) {
   }, 10 * 60 * 1000); // every 10 minutes
 }
 
-/* ─────────────────────────────────────────
+/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
    START
-───────────────────────────────────────── */
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const PORT = process.env.PORT || 4000;
 
 /**
- * ensureMainBranchAndBackfill — one-time migration run on every boot
+ * ensureMainBranchAndBackfill â€” one-time migration run on every boot
  * (cheap no-op once it's done). Creates a "Main Branch" venue if none
  * exists yet, then backfills venueId onto every pre-existing document
  * in every venue-scoped collection (and onto admins without a venue,
@@ -1123,7 +1046,7 @@ async function ensureMainBranchAndBackfill() {
     mainBranch = await Venue.create({
       id: newVenueId(),
       name: "Main Branch",
-      address: "Not yet set — update in Venues",
+      address: "Not yet set â€” update in Venues",
       area: "Not yet set",
     });
     mainBranch = mainBranch.toObject();
@@ -1157,6 +1080,19 @@ async function ensureMainBranchAndBackfill() {
 
   return mainBranch;
 }
+
+app.use(
+  "/venues",
+  venuesModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole, logAudit })
+);
+app.use(
+  "/permissions",
+  permissionsModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole, logAudit })
+);
+app.use(
+  "/audit-logs",
+  auditLogModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole })
+);
 
 mongoose
   .connect(process.env.MONGO_URI)

@@ -1,0 +1,47 @@
+[
+  {
+    "staffId": "staff_karthik",
+    "name": "Karthik",
+    "hrRole": "Chef",
+    "mappedTo": "Manager / Chef",
+    "email": "karthik.karthik@samcafe.local",
+    "tempPassword": "bmcR4ndwJQ",
+    "status": "created"
+  },
+  {
+    "staffId": "staff_siva",
+    "name": "Siva",
+    "hrRole": "Cleaner",
+    "mappedTo": "Supervisor / Sous Chef",
+    "email": "siva.siva@samcafe.local",
+    "tempPassword": "XqAgHey4rb",
+    "status": "created"
+  },
+  {
+    "staffId": "staff_priya",
+    "name": "Priya",
+    "hrRole": "Receptionist",
+    "mappedTo": "Supervisor / Captain",
+    "email": "priya.priya@samcafe.local",
+    "tempPassword": "UG5vVukyM5",
+    "status": "created"
+  },
+  {
+    "staffId": "staff_rahul",
+    "name": "Rahul",
+    "hrRole": "Assistant Chef",
+    "mappedTo": "Supervisor / Sous Chef",
+    "email": "rahul.rahul@samcafe.local",
+    "tempPassword": "3HGp4nqxct",
+    "status": "created"
+  },
+  {
+    "staffId": "staff_meena",
+    "name": "Meena",
+    "hrRole": "Billing",
+    "mappedTo": "Manager / Service Manager",
+    "email": "meena.meena@samcafe.local",
+    "tempPassword": "adZqg5DUbp",
+    "status": "created"
+  }
+]

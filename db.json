@@ -2693,7 +2693,14 @@
               ],
               "history": "Veg starters are inspired by popular global appetizers and Indian snack traditions.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "variants": [
+                {
+                  "name": "wheat bread",
+                  "extraCharge": 20
+                }
+              ],
+              "eventField": "yes"
             },
             {
               "id": "cheese_balls_corn",
@@ -2735,7 +2742,8 @@
               ],
               "history": "Veg starters are inspired by popular global appetizers and Indian snack traditions.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "paneer_65",
@@ -2777,7 +2785,8 @@
               ],
               "history": "Paneer 65 originated as a vegetarian twist of the popular South Indian starter.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "mushroom_65",
@@ -2819,7 +2828,8 @@
               ],
               "history": "Mushroom 65 is a vegetarian variation of the iconic South Indian snack.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "paneer_tikka",
@@ -2861,7 +2871,8 @@
               ],
               "history": "Paneer tikka is a famous North Indian tandoori appetizer.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "mushroom_tikka",
@@ -2903,7 +2914,8 @@
               ],
               "history": "Mushroom tikka is a grilled vegetarian delicacy inspired by tandoori cooking.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "hash_browns",
@@ -2945,7 +2957,8 @@
               ],
               "history": "Hash browns are a classic crispy potato snack popular worldwide.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "cheese_loaded_nachos",
@@ -2987,7 +3000,8 @@
               ],
               "history": "Nachos originated in Mexican cuisine and became a popular snack worldwide.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "cheese_loaded_potato",
@@ -3029,7 +3043,8 @@
               ],
               "history": "Cheese loaded potatoes are inspired by baked potato dishes.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "masala_fries_cheese",
@@ -3071,7 +3086,8 @@
               ],
               "history": "Masala fries are an Indian twist on classic french fries.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "eight_treasures",
@@ -3113,7 +3129,8 @@
               ],
               "history": "Eight treasures is inspired by Chinese vegetable stir fry dishes.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "veg_quesadilla",
@@ -3155,7 +3172,8 @@
               ],
               "history": "Quesadilla is a traditional Mexican dish filled with cheese and vegetables.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             }
           ]
         },
@@ -3221,7 +3239,8 @@
               ],
               "history": "Non veg starters combine global appetizer styles with rich chicken flavors.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "chicken_cheese_balls",
@@ -3263,7 +3282,8 @@
               ],
               "history": "Cheese balls are popular crispy snack starters across many cuisines.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "crispy_fried_chicken_breast",
@@ -3305,7 +3325,8 @@
               ],
               "history": "Fried chicken is one of the most iconic crispy appetizers worldwide.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "chicken_65",
@@ -3347,7 +3368,8 @@
               ],
               "history": "Chicken 65 originated in South India and became a famous spicy appetizer.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "chicken_tikka",
@@ -3389,7 +3411,8 @@
               ],
               "history": "Chicken tikka is a classic Indian tandoori dish loved worldwide.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "prawn_65",
@@ -3431,7 +3454,8 @@
               ],
               "history": "Prawn 65 is a seafood variation of the famous South Indian appetizer.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "chicken_popcorn",
@@ -3473,7 +3497,8 @@
               ],
               "history": "Chicken popcorn is a popular fast-food style crispy snack.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "chicken_lollipop",
@@ -3515,7 +3540,8 @@
               ],
               "history": "Chicken lollipop is an Indo-Chinese appetizer famous in Indian restaurants.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "crispy_chicken_wings",
@@ -3557,7 +3583,8 @@
               ],
               "history": "Chicken wings became popular as crispy bar snacks worldwide.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "devilled_eggs",
@@ -3599,7 +3626,8 @@
               ],
               "history": "Devilled eggs are a classic appetizer originating in European cuisine.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "chicken_cheese_nachos",
@@ -3641,7 +3669,8 @@
               ],
               "history": "Nachos are a Mexican snack that became globally popular.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "fish_n_chips",
@@ -3683,7 +3712,8 @@
               ],
               "history": "Fish and chips originated in the UK and became a global comfort food.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             }
           ]
         }
@@ -3757,7 +3787,8 @@
               ],
               "history": "Clear soups are light broths prepared with vegetables and mild seasoning.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "sweetcorn_clear_soup",
@@ -3799,7 +3830,8 @@
               ],
               "history": "Sweet corn soups became popular in Indo-Chinese cuisine.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "mushroom_clear_soup",
@@ -3841,7 +3873,8 @@
               ],
               "history": "Mushroom broths are widely used in Asian soups.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "chicken_clear_soup",
@@ -3883,7 +3916,8 @@
               ],
               "history": "Chicken broth is one of the most traditional soup bases worldwide.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "prawn_clear_soup",
@@ -3925,7 +3959,8 @@
               ],
               "history": "Seafood broths are common in coastal Asian cuisines.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             }
           ]
         },
@@ -3991,7 +4026,8 @@
               ],
               "history": "Hot and sour soup is a popular Indo-Chinese soup known for its spicy and tangy flavor.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "sweetcorn_hot_sour_soup",
@@ -4033,7 +4069,8 @@
               ],
               "history": "Hot and sour soup variations are widely served in Indo-Chinese restaurants.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "mushroom_hot_sour_soup",
@@ -4075,7 +4112,8 @@
               ],
               "history": "Mushroom versions of hot and sour soup add an earthy flavor to the broth.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "chicken_hot_sour_soup",
@@ -4117,7 +4155,8 @@
               ],
               "history": "Chicken hot and sour soup is a protein-rich variation of the classic soup.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "prawn_hot_sour_soup",
@@ -4159,7 +4198,8 @@
               ],
               "history": "Seafood versions of hot and sour soup are popular in coastal Asian cuisines.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "veg_manchow_soup",
@@ -4201,7 +4241,8 @@
               ],
               "history": "Manchow soup is an Indo-Chinese creation famous for its crispy noodle topping.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "sweetcorn_manchow_soup",
@@ -4243,7 +4284,8 @@
               ],
               "history": "Sweet corn versions of Manchow soup add natural sweetness to the spicy broth.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "mushroom_manchow_soup",
@@ -4285,7 +4327,8 @@
               ],
               "history": "Manchow soup is one of the most loved Indo-Chinese soups in restaurants.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "chicken_manchow_soup",
@@ -4327,7 +4370,8 @@
               ],
               "history": "Chicken Manchow soup is a hearty variation of the Indo-Chinese classic.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "prawn_manchow_soup",
@@ -4369,7 +4413,8 @@
               ],
               "history": "Seafood Manchow soups are popular Indo-Chinese restaurant specialties.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             }
           ]
         },
@@ -4435,7 +4480,8 @@
               ],
               "history": "Cream soups originated in European cuisine and became popular worldwide for their smooth texture.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "cream_of_mushroom",
@@ -4477,7 +4523,8 @@
               ],
               "history": "Cream of mushroom soup is one of the most famous classic cream soups.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "cream_of_broccoli",
@@ -4519,7 +4566,8 @@
               ],
               "history": "Broccoli cream soup is known for its nutritious and creamy taste.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "cream_of_spinach",
@@ -4561,7 +4609,8 @@
               ],
               "history": "Spinach cream soup is a classic nutritious soup popular in many cuisines.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "cream_of_peas",
@@ -4603,7 +4652,8 @@
               ],
               "history": "Cream of peas soup is known for its mild sweetness and smooth texture.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "cream_of_chicken",
@@ -4645,7 +4695,8 @@
               ],
               "history": "Cream of chicken soup is a comforting classic loved around the world.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "cream_of_chicken_mushroom",
@@ -4687,7 +4738,8 @@
               ],
               "history": "Chicken and mushroom cream soup combines rich protein with earthy mushroom flavors.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "gazpacho",
@@ -4729,7 +4781,8 @@
               ],
               "history": "Gazpacho is a traditional Spanish cold soup made with blended fresh vegetables and olive oil, known for its refreshing taste in warm climates.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             }
           ]
         }
@@ -4870,7 +4923,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "hunan_paneer",
@@ -4912,7 +4966,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "hunan_chicken",
@@ -4954,7 +5009,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "hunan_prawn",
@@ -4996,7 +5052,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "kung_pao_potato",
@@ -5038,7 +5095,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "kung_pao_paneer",
@@ -5080,7 +5138,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "kung_pao_chicken",
@@ -5122,7 +5181,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "kung_pao_prawn",
@@ -5164,7 +5224,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "mongolian_potato",
@@ -5206,7 +5267,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "mongolian_paneer",
@@ -5248,7 +5310,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "mongolian_chicken",
@@ -5290,7 +5353,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "mongolian_prawn",
@@ -5332,7 +5396,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "moo_goo_gai_pan_potato",
@@ -5374,7 +5439,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "moo_goo_gai_pan_paneer",
@@ -5416,7 +5482,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "moo_goo_gai_pan_chicken",
@@ -5458,7 +5525,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "moo_goo_gai_pan_prawn",
@@ -5500,7 +5568,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "orange_potato",
@@ -5542,7 +5611,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "orange_paneer",
@@ -5584,7 +5654,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "orange_chicken",
@@ -5626,7 +5697,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "orange_prawn",
@@ -5668,7 +5740,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "lemon_potato",
@@ -5710,7 +5783,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "lemon_paneer",
@@ -5752,7 +5826,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "lemon_chicken",
@@ -5794,7 +5869,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "lemon_prawn",
@@ -5836,7 +5912,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "dragon_potato",
@@ -5878,7 +5955,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "dragon_paneer",
@@ -5920,7 +5998,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "dragon_chicken",
@@ -5962,7 +6041,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "dragon_prawn",
@@ -6004,7 +6084,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "cajun_potato",
@@ -6046,7 +6127,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "cajun_paneer",
@@ -6088,7 +6170,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "cajun_chicken",
@@ -6130,7 +6213,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "cajun_prawn",
@@ -6172,7 +6256,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "buffalo_potato",
@@ -6214,7 +6299,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "buffalo_paneer",
@@ -6256,7 +6342,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "buffalo_chicken",
@@ -6298,7 +6385,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "buffalo_prawn",
@@ -6340,7 +6428,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "tawa_chicken",
@@ -6382,7 +6471,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "afghani_chicken",
@@ -6424,7 +6514,8 @@
           ],
           "history": "Appetizer dishes are inspired by Indo‑Chinese and Asian cuisine, combining bold sauces, wok‑tossed cooking techniques and crispy textures popular in modern restaurant menus.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         }
       ]
     },
@@ -6495,7 +6586,8 @@
               ],
               "history": "Cold coffee became popular in modern cafés as a refreshing chilled beverage made with coffee, milk and ice.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "cold_coffee_chocolate",
@@ -6537,7 +6629,8 @@
               ],
               "history": "Chocolate cold coffee is a modern café favourite combining chilled coffee with rich chocolate flavour.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "cold_coffee_nutella",
@@ -6579,7 +6672,8 @@
               ],
               "history": "Nutella cold coffee blends coffee with the famous hazelnut chocolate spread for a richer taste.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "cold_coffee_brownie",
@@ -6621,7 +6715,8 @@
               ],
               "history": "Brownie cold coffee is a dessert-style beverage popular in modern cafés.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "irish_cream_coffee",
@@ -6663,7 +6758,8 @@
               ],
               "history": "Irish cream coffee drinks became popular in cafés for their smooth creamy flavor.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             }
           ]
         },
@@ -6724,7 +6820,8 @@
               ],
               "history": "Iced tea is a refreshing chilled beverage made by cooling brewed tea with citrus and sweeteners.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "hibiscus_iced_tea",
@@ -6766,7 +6863,8 @@
               ],
               "history": "Hibiscus iced tea is known for its bright red color and refreshing tart flavor.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "butterfly_pea_iced_tea",
@@ -6808,7 +6906,8 @@
               ],
               "history": "Butterfly pea tea is famous for its natural blue color and antioxidant properties.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "iced_butterfly_pea_latte",
@@ -6850,7 +6949,8 @@
               ],
               "history": "Butterfly pea latte combines herbal tea with milk for a colorful café beverage.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             }
           ]
         },
@@ -6911,7 +7011,8 @@
               ],
               "history": "Hot coffee is one of the most widely consumed beverages worldwide.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "espresso",
@@ -6953,7 +7054,8 @@
               ],
               "history": "Espresso originated in Italy and became the base for many coffee drinks.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "double_espresso",
@@ -6995,7 +7097,8 @@
               ],
               "history": "Double espresso offers a stronger coffee experience with two espresso shots.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "americana",
@@ -7037,7 +7140,8 @@
               ],
               "history": "Americano became popular when espresso was diluted with hot water.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "irish_coffee",
@@ -7079,7 +7183,8 @@
               ],
               "history": "Irish coffee blends coffee with creamy flavoring to create a rich beverage.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             }
           ]
         },
@@ -7140,7 +7245,8 @@
               ],
               "history": "Milk tea is a staple beverage in many cultures.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "masala_tea",
@@ -7182,7 +7288,8 @@
               ],
               "history": "Masala tea originated in India with spices added to black tea.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "black_tea",
@@ -7224,7 +7331,8 @@
               ],
               "history": "Herbal teas are caffeine-free beverages known for their soothing qualities.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "lemon_tea",
@@ -7266,7 +7374,8 @@
               ],
               "history": "Herbal teas are caffeine-free beverages known for their soothing qualities.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "green_tea",
@@ -7308,7 +7417,8 @@
               ],
               "history": "Herbal teas are caffeine-free beverages known for their soothing qualities.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "mint_tea",
@@ -7350,7 +7460,8 @@
               ],
               "history": "Herbal teas are caffeine-free beverages known for their soothing qualities.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "honey_tea",
@@ -7392,7 +7503,8 @@
               ],
               "history": "Herbal teas are caffeine-free beverages known for their soothing qualities.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "butterfly_pea_tea",
@@ -7434,7 +7546,8 @@
               ],
               "history": "Floral teas are brewed using aromatic flowers known for calming effects.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "hibiscus_tea",
@@ -7476,7 +7589,8 @@
               ],
               "history": "Floral teas are brewed using aromatic flowers known for calming effects.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "chamomile_tea",
@@ -7518,7 +7632,8 @@
               ],
               "history": "Floral teas are brewed using aromatic flowers known for calming effects.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "lavender_tea",
@@ -7560,7 +7675,8 @@
               ],
               "history": "Floral teas are brewed using aromatic flowers known for calming effects.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "rosemary_tea",
@@ -7602,7 +7718,8 @@
               ],
               "history": "Floral teas are brewed using aromatic flowers known for calming effects.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "pink_tea",
@@ -7644,7 +7761,8 @@
               ],
               "history": "Exotic teas combine traditional tea styles from different cultures.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "gulkand_tea",
@@ -7686,7 +7804,8 @@
               ],
               "history": "Exotic teas combine traditional tea styles from different cultures.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "kahwa_tea",
@@ -7728,7 +7847,8 @@
               ],
               "history": "Exotic teas combine traditional tea styles from different cultures.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             }
           ]
         },
@@ -7789,7 +7909,8 @@
               ],
               "history": "Brazilian lemonade is a refreshing citrus drink popular in tropical regions.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "saffron_n_rose",
@@ -7831,7 +7952,8 @@
               ],
               "history": "Rose flavored drinks have been popular in Middle Eastern and South Asian cuisine.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "mimosa",
@@ -7873,7 +7995,8 @@
               ],
               "history": "Mimosa style drinks combine citrus flavors for refreshing beverages.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "pina_colada",
@@ -7915,7 +8038,8 @@
               ],
               "history": "Piña colada is a famous tropical drink known for its coconut and pineapple flavor.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "cranberry_sunrise",
@@ -7957,7 +8081,8 @@
               ],
               "history": "Piña colada is a famous tropical drink known for its coconut and pineapple flavor.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "blue_hawaiian",
@@ -7999,7 +8124,8 @@
               ],
               "history": "Piña colada is a famous tropical drink known for its coconut and pineapple flavor.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "rainbow_paradise",
@@ -8041,7 +8167,8 @@
               ],
               "history": "Piña colada is a famous tropical drink known for its coconut and pineapple flavor.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "miami_vice_city",
@@ -8083,7 +8210,8 @@
               ],
               "history": "Piña colada is a famous tropical drink known for its coconut and pineapple flavor.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "lychee_refreshner",
@@ -8125,7 +8253,8 @@
               ],
               "history": "Piña colada is a famous tropical drink known for its coconut and pineapple flavor.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             }
           ]
         },
@@ -8186,7 +8315,8 @@
               ],
               "history": "Milkshakes became popular in American diners as sweet blended milk drinks.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "strawberry_milkshake",
@@ -8228,7 +8358,8 @@
               ],
               "history": "Milkshakes became popular in American diners as sweet blended milk drinks.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "blueberry_milkshake",
@@ -8270,7 +8401,8 @@
               ],
               "history": "Milkshakes became popular in American diners as sweet blended milk drinks.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "mango_milkshake",
@@ -8312,7 +8444,8 @@
               ],
               "history": "Milkshakes became popular in American diners as sweet blended milk drinks.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "pineapple_milkshake",
@@ -8354,7 +8487,8 @@
               ],
               "history": "Milkshakes became popular in American diners as sweet blended milk drinks.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "butterscotch_milkshake",
@@ -8396,7 +8530,8 @@
               ],
               "history": "Milkshakes became popular in American diners as sweet blended milk drinks.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "chocolate_milkshake",
@@ -8438,7 +8573,8 @@
               ],
               "history": "Milkshakes became popular in American diners as sweet blended milk drinks.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "the_breakfast",
@@ -8480,7 +8616,8 @@
               ],
               "history": "Dessert milkshakes combine sweets and coffee flavors.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "birthday_cake",
@@ -8522,7 +8659,8 @@
               ],
               "history": "Birthday cake shakes replicate the flavor of celebration cakes.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "thick_chocolate_shake",
@@ -8564,7 +8702,8 @@
               ],
               "history": "Chocolate milkshakes remain one of the most popular café drinks.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             }
           ]
         }
@@ -8627,7 +8766,8 @@
           ],
           "history": "Egg dishes have long been popular breakfast meals known for their high protein content.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "devilled_egg_pasta_salad",
@@ -8669,7 +8809,8 @@
           ],
           "history": "Devilled egg dishes became popular in Western cuisine as creamy appetizers.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "egg_sliders",
@@ -8711,7 +8852,8 @@
           ],
           "history": "Egg sliders are a modern café snack combining eggs with sandwich-style fillings.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "korean_egg_roll",
@@ -8753,7 +8895,8 @@
           ],
           "history": "Korean egg rolls are a popular street-style dish made with layered eggs and vegetables.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "spanish_omelette",
@@ -8795,7 +8938,8 @@
           ],
           "history": "Spanish omelette or tortilla española is a classic egg dish from Spain.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "cheese_omelette",
@@ -8837,7 +8981,8 @@
           ],
           "history": "Cheese omelettes are a popular breakfast dish across many cuisines.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "egg_white_omelette",
@@ -8879,7 +9024,8 @@
           ],
           "history": "Egg white omelettes are a healthier alternative with lower fat content.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "masala_omelette",
@@ -8921,7 +9067,8 @@
           ],
           "history": "Masala omelette is a popular Indian street-style egg dish.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         }
       ]
     },
@@ -8987,7 +9134,8 @@
               ],
               "history": "Chocolate mousse originated in France as a light whipped chocolate dessert.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "panna_cotta",
@@ -9029,7 +9177,8 @@
               ],
               "history": "Panna cotta is a traditional Italian dessert known for its silky texture.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "chocolate_brownie",
@@ -9071,7 +9220,8 @@
               ],
               "history": "Chocolate brownies are classic American baked desserts.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "creme_caramel",
@@ -9113,7 +9263,8 @@
               ],
               "history": "Crème caramel is a classic European custard dessert topped with caramel.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "orange_curd_tart",
@@ -9155,7 +9306,8 @@
               ],
               "history": "Fruit curd tarts are popular European pastries.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "carrot_cake",
@@ -9197,7 +9349,8 @@
               ],
               "history": "Carrot cake became popular as a sweet dessert with natural vegetable sweetness.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "cheesecake",
@@ -9239,7 +9392,8 @@
               ],
               "history": "Cheesecake is one of the most famous desserts worldwide.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "chocolate_lava_mug_cake",
@@ -9281,7 +9435,8 @@
               ],
               "history": "Chocolate lava cakes became popular for their molten chocolate center.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "fruit_custard",
@@ -9323,7 +9478,8 @@
               ],
               "history": "Fruit custard is a classic chilled dessert enjoyed in many households.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             }
           ]
         },
@@ -9384,7 +9540,8 @@
               ],
               "history": "Banana split is one of the most famous ice cream desserts.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "rose_falooda",
@@ -9426,7 +9583,8 @@
               ],
               "history": "Falooda is a popular South Asian dessert drink.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "dry_fruit_falooda",
@@ -9468,7 +9626,8 @@
               ],
               "history": "Dry fruit falooda is a rich variation of the traditional falooda dessert.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "two_scoop_ice_cream",
@@ -9510,7 +9669,8 @@
               ],
               "history": "Simple scoop desserts remain café favorites worldwide.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             }
           ]
         }
@@ -9561,7 +9721,8 @@
           ],
           "history": "Pizza dishes originated from popular street-style and traditional recipes. Over time, they have been refined to suit modern tastes while retaining their original character.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "corn_and_cheese_pizza",
@@ -9603,7 +9764,8 @@
           ],
           "history": "Pizza dishes originated from popular street-style and traditional recipes. Over time, they have been refined to suit modern tastes while retaining their original character.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "garden_fresh_pizza",
@@ -9645,7 +9807,8 @@
           ],
           "history": "Pizza dishes originated from popular street-style and traditional recipes.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "triple_cheese_pizza",
@@ -9687,7 +9850,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "mushroom_white_sauce_pizza",
@@ -9729,7 +9893,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "paneer_tikka_pizza",
@@ -9771,7 +9936,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "chicken_tikka_pizza",
@@ -9813,7 +9979,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "bbq_chicken_pizza",
@@ -9855,7 +10022,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "peri_peri_chicken_pizza",
@@ -9897,7 +10065,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "buffalo_chicken_pizza",
@@ -9939,7 +10108,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "ultimate_chicken_pizza",
@@ -9981,7 +10151,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "meat_lovers_pizza",
@@ -10023,7 +10194,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "chicken_salami_pizza",
@@ -10065,7 +10237,8 @@
           ],
           "history": "Pizza dishes originated from traditional street-style recipes.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         }
       ]
     },
@@ -10131,7 +10304,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "paneer_burger",
@@ -10173,7 +10347,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "classic_chicken_burger",
@@ -10215,7 +10390,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "grilled_chicken_burger",
@@ -10257,7 +10433,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "crispy_chicken_burger",
@@ -10299,7 +10476,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "double_chicken_patty_burger",
@@ -10341,7 +10519,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "double_chicken_double_cheese_burger",
@@ -10383,7 +10562,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "bbq_chicken_burger",
@@ -10425,7 +10605,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "peri_peri_chicken_burger",
@@ -10467,7 +10648,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "chicken_tikka_burger",
@@ -10509,7 +10691,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "tower_chicken_burger",
@@ -10551,7 +10734,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "fish_fillet_burger",
@@ -10593,7 +10777,8 @@
           ],
           "history": "Burger dishes originated from popular street-style recipes.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         }
       ]
     },
@@ -10651,7 +10836,8 @@
           ],
           "history": "Fried rice originated from Chinese cuisine and became popular worldwide due to its simple preparation and adaptable ingredients.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "mushroom_fried_rice",
@@ -10681,7 +10867,8 @@
           ],
           "history": "Mushroom based fried rice variations became popular in Asian fusion cuisine.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "paneer_fried_rice",
@@ -10711,7 +10898,8 @@
           ],
           "history": "Paneer fried rice is an Indo-Chinese fusion dish widely served in Indian restaurants.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "egg_fried_rice",
@@ -10741,7 +10929,8 @@
           ],
           "history": "Egg fried rice is one of the most traditional Chinese rice preparations.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "chicken_fried_rice",
@@ -10771,7 +10960,8 @@
           ],
           "history": "Chicken fried rice became a staple Indo-Chinese restaurant dish.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "prawn_fried_rice",
@@ -10801,7 +10991,8 @@
           ],
           "history": "Seafood fried rice variations are popular in coastal Asian cuisines.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "veg_schezwan_fried_rice",
@@ -10831,7 +11022,8 @@
           ],
           "history": "Schezwan fried rice is a spicy Indo-Chinese adaptation of Sichuan cuisine.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "mushroom_schezwan_fried_rice",
@@ -10861,7 +11053,8 @@
           ],
           "history": "Combining mushrooms with Schezwan spices adds depth to Indo-Chinese dishes.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "paneer_schezwan_fried_rice",
@@ -10891,7 +11084,8 @@
           ],
           "history": "Paneer versions of Chinese dishes are a signature Indo-Chinese innovation.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "egg_schezwan_fried_rice",
@@ -10921,7 +11115,8 @@
           ],
           "history": "A spicy twist on the classic egg fried rice.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "chicken_schezwan_fried_rice",
@@ -10951,7 +11146,8 @@
           ],
           "history": "A spicy Indo-Chinese favorite served in most Asian restaurants.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "prawn_schezwan_fried_rice",
@@ -10981,7 +11177,8 @@
           ],
           "history": "Seafood and Schezwan spices make this dish bold and flavorful.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "mushroom_pad_thai_noodles",
@@ -11011,7 +11208,8 @@
           ],
           "history": "Pad Thai is one of Thailand's most famous noodle dishes.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "egg_pad_thai_noodles",
@@ -11041,7 +11239,8 @@
           ],
           "history": "Pad Thai became Thailand's national street food dish.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "chicken_pad_thai_noodles",
@@ -11071,7 +11270,8 @@
           ],
           "history": "Chicken Pad Thai is a globally popular Thai noodle dish.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "prawn_pad_thai_noodles",
@@ -11101,7 +11301,8 @@
           ],
           "history": "Seafood Pad Thai is commonly served in Thai coastal regions.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "seafood_pad_thai_noodles",
@@ -11131,7 +11332,8 @@
           ],
           "history": "Seafood Pad Thai combines traditional Thai noodles with ocean flavors.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         }
       ]
     },
@@ -11180,7 +11382,8 @@
           ],
           "history": "Aglio e Olio originated in Naples and is known for its simple yet bold flavors.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "lasagne",
@@ -11210,7 +11413,8 @@
           ],
           "history": "Lasagne is one of the oldest pasta dishes from Italy.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "mac_n_cheese",
@@ -11240,7 +11444,8 @@
           ],
           "history": "Mac and Cheese became widely popular in America as comfort food.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "pasta_alfredo",
@@ -11270,7 +11475,8 @@
           ],
           "history": "Alfredo pasta was created in Rome and became famous worldwide.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "pasta_florentine",
@@ -11300,7 +11506,8 @@
           ],
           "history": "Florentine dishes traditionally include spinach as a key ingredient.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "pasta_arrabiata",
@@ -11330,7 +11537,8 @@
           ],
           "history": "Arrabiata means 'angry' in Italian, referring to the spicy sauce.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "pasta_napolitan",
@@ -11360,7 +11568,8 @@
           ],
           "history": "Napolitan pasta is a Japanese adaptation of Italian pasta.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "pasta_alla_rosa",
@@ -11390,7 +11599,8 @@
           ],
           "history": "Pink sauce pasta combines tomato tanginess with creamy richness.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "pasta_alla_funghi",
@@ -11420,7 +11630,8 @@
           ],
           "history": "Funghi pasta highlights the earthy flavor of mushrooms.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "pasta_al_forno",
@@ -11450,7 +11661,8 @@
           ],
           "history": "Al Forno means 'baked in the oven' in Italian cuisine.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         }
       ]
     },
@@ -11504,7 +11716,8 @@
               ],
               "history": "Vegetable sandwiches are a staple café snack worldwide.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "nutella_sandwich",
@@ -11534,7 +11747,8 @@
               ],
               "history": "Sweet sandwiches with Nutella became popular in cafés and dessert shops.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "yes"
             },
             {
               "id": "paneer_sandwich",
@@ -11564,7 +11778,8 @@
               ],
               "history": "Paneer sandwiches combine Indian flavors with Western sandwich style.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "egg_sandwich",
@@ -11594,7 +11809,8 @@
               ],
               "history": "Egg sandwiches are one of the most classic breakfast dishes.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "chicken_sandwich",
@@ -11624,7 +11840,8 @@
               ],
               "history": "Chicken sandwiches are popular in cafés and fast food chains.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             },
             {
               "id": "fried_chicken_sandwich",
@@ -11654,7 +11871,8 @@
               ],
               "history": "Fried chicken sandwiches became famous through American fast food culture.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "yes"
             }
           ]
         },
@@ -11715,7 +11933,8 @@
               ],
               "history": "Vegetable wraps became popular as a quick café snack combining fresh vegetables and sauces.",
               "isVeg": true,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "chicken_wrap",
@@ -11757,7 +11976,8 @@
               ],
               "history": "Chicken wraps are a global fast-casual favorite known for their protein-rich filling.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "seafood_wrap",
@@ -11799,7 +12019,8 @@
               ],
               "history": "Seafood wraps combine coastal flavors with street-style wrap preparation.",
               "isVeg": false,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             }
           ]
         },
@@ -11860,7 +12081,8 @@
               ],
               "history": "Burritos originated in Mexican cuisine and are known for their rich fillings wrapped in tortillas.",
               "isVeg": true,
-              "isEventFood": false
+              "isEventFood": false,
+              "eventField": "no"
             },
             {
               "id": "chicken_burrito",
@@ -11902,7 +12124,8 @@
               ],
               "history": "Chicken burritos are widely loved for their hearty protein-packed filling.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             },
             {
               "id": "seafood_burrito",
@@ -11944,7 +12167,8 @@
               ],
               "history": "Seafood burritos combine Mexican wrapping style with coastal seafood flavors.",
               "isVeg": false,
-              "isEventFood": true
+              "isEventFood": true,
+              "eventField": "no"
             }
           ]
         }
@@ -12002,7 +12226,8 @@
           ],
           "history": "Overnight oats became popular as a convenient healthy breakfast option.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "apple_cinnamon_oats",
@@ -12044,7 +12269,8 @@
           ],
           "history": "Apple cinnamon oats combine classic dessert flavors with a nutritious breakfast.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "pina_colada_oats",
@@ -12086,7 +12312,8 @@
           ],
           "history": "Inspired by the tropical Pina Colada flavor combination.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "vegan_soy_oats",
@@ -12128,7 +12355,8 @@
           ],
           "history": "Plant-based overnight oats are popular among vegan and health-conscious consumers.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         }
       ]
     },
@@ -12189,7 +12417,8 @@
           ],
           "history": "Greek salad is a Mediterranean classic known for its fresh vegetables and feta cheese.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "chicken_greek_salad",
@@ -12231,7 +12460,8 @@
           ],
           "history": "Chicken Greek salad is a protein-rich adaptation of the Mediterranean dish.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "seafood_greek_salad",
@@ -12273,7 +12503,8 @@
           ],
           "history": "Seafood Greek salad blends Mediterranean vegetables with coastal seafood flavors.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "veg_russian_salad",
@@ -12315,7 +12546,8 @@
           ],
           "history": "Russian salad originated in Eastern Europe and became popular worldwide.",
           "isVeg": true,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "yes"
         },
         {
           "id": "chicken_russian_salad",
@@ -12357,7 +12589,8 @@
           ],
           "history": "Chicken Russian salad adds protein to the creamy vegetable base.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "veg_oriental_salad",
@@ -12399,7 +12632,8 @@
           ],
           "history": "Oriental salads highlight crisp vegetables with Asian-style dressings.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "chicken_oriental_salad",
@@ -12441,7 +12675,8 @@
           ],
           "history": "Chicken oriental salad combines Asian vegetables with grilled chicken.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "indian_green_salad",
@@ -12483,7 +12718,8 @@
           ],
           "history": "Indian green salad is a simple accompaniment served with many meals.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         },
         {
           "id": "prawn_oriental_salad",
@@ -12525,7 +12761,8 @@
           ],
           "history": "Prawn oriental salad blends seafood with Asian salad techniques.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "no"
         }
       ]
     },
@@ -12581,7 +12818,8 @@
           ],
           "history": "Shashlik is inspired by skewered grilled dishes from Central Asia.",
           "isVeg": true,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "corn_rice_with_veggies",
@@ -12623,7 +12861,8 @@
           ],
           "history": "Corn rice dishes are popular for their mild sweetness and hearty texture.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "creamy_baked_chicken",
@@ -12665,7 +12904,8 @@
           ],
           "history": "Creamy baked chicken dishes are popular comfort meals in Western cuisine.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "honey_glazed_chicken_steak",
@@ -12707,7 +12947,8 @@
           ],
           "history": "Honey glazed meats are known for balancing sweet and savory flavors.",
           "isVeg": false,
-          "isEventFood": true
+          "isEventFood": true,
+          "eventField": "yes"
         },
         {
           "id": "chicken_parmigiana",
@@ -12749,7 +12990,8 @@
           ],
           "history": "Chicken Parmigiana originated in Italian-American cuisine.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "tangy_crispy_chicken",
@@ -12791,7 +13033,8 @@
           ],
           "history": "General TSO chicken is a famous sweet and spicy Chinese-American dish.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         },
         {
           "id": "fish_steak",
@@ -12833,7 +13076,8 @@
           ],
           "history": "Fish steak dishes highlight the natural flavor and texture of fresh seafood.",
           "isVeg": false,
-          "isEventFood": false
+          "isEventFood": false,
+          "eventField": "no"
         }
       ]
     }
@@ -12887,7 +13131,7 @@
         "wraps"
       ],
       "pricePer100g": 23,
-      "stockRemaining": 4.680000000000005,
+      "stockRemaining": 4.620000000000005,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -12917,7 +13161,7 @@
         "wraps"
       ],
       "pricePer100g": 24,
-      "stockRemaining": 7.86000000000001,
+      "stockRemaining": 7.8000000000000105,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -12947,7 +13191,7 @@
         "wraps"
       ],
       "pricePer100g": 25,
-      "stockRemaining": 8.815000000000003,
+      "stockRemaining": 8.765000000000002,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13037,7 +13281,7 @@
         "wraps"
       ],
       "pricePer100g": 28,
-      "stockRemaining": 11.620000000000005,
+      "stockRemaining": 11.520000000000007,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13067,7 +13311,7 @@
         "wraps"
       ],
       "pricePer100g": 29,
-      "stockRemaining": 13.400000000000004,
+      "stockRemaining": 13.280000000000005,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13247,7 +13491,7 @@
         "wraps"
       ],
       "pricePer100g": 36,
-      "stockRemaining": 20.00999999999997,
+      "stockRemaining": 19.94999999999997,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13367,7 +13611,7 @@
         "wraps"
       ],
       "pricePer100g": 40,
-      "stockRemaining": 24.720000000000006,
+      "stockRemaining": 24.660000000000007,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13487,7 +13731,7 @@
         "wraps"
       ],
       "pricePer100g": 44,
-      "stockRemaining": 27.85999999999999,
+      "stockRemaining": 27.639999999999986,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13576,7 +13820,7 @@
         "wraps"
       ],
       "pricePer100g": 47,
-      "stockRemaining": 3.919999999999999,
+      "stockRemaining": 3.639999999999999,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13606,7 +13850,7 @@
         "wraps"
       ],
       "pricePer100g": 48,
-      "stockRemaining": 6.850000000000001,
+      "stockRemaining": 6.820000000000001,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13636,7 +13880,7 @@
         "wraps"
       ],
       "pricePer100g": 49,
-      "stockRemaining": 8.810000000000004,
+      "stockRemaining": 8.750000000000004,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13696,7 +13940,7 @@
         "wraps"
       ],
       "pricePer100g": 51,
-      "stockRemaining": 10.760000000000002,
+      "stockRemaining": 10.680000000000001,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13726,7 +13970,7 @@
         "wraps"
       ],
       "pricePer100g": 52,
-      "stockRemaining": 9.930000000000003,
+      "stockRemaining": 9.530000000000003,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13786,7 +14030,7 @@
         "wraps"
       ],
       "pricePer100g": 54,
-      "stockRemaining": 13.770000000000001,
+      "stockRemaining": 13.730000000000002,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -13906,7 +14150,7 @@
         "wraps"
       ],
       "pricePer100g": 58,
-      "stockRemaining": 11.71,
+      "stockRemaining": 11.56,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -14116,7 +14360,7 @@
         "wraps"
       ],
       "pricePer100g": 65,
-      "stockRemaining": 23.62,
+      "stockRemaining": 23.57,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -14146,7 +14390,7 @@
         "wraps"
       ],
       "pricePer100g": 66,
-      "stockRemaining": 24.420000000000005,
+      "stockRemaining": 24.300000000000004,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -14266,7 +14510,7 @@
         "wraps"
       ],
       "pricePer100g": 70,
-      "stockRemaining": 4.860000000000002,
+      "stockRemaining": 4.830000000000002,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -14356,7 +14600,7 @@
         "wraps"
       ],
       "pricePer100g": 73,
-      "stockRemaining": 3.5200000000000005,
+      "stockRemaining": 3.4300000000000006,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -14476,7 +14720,7 @@
         "wraps"
       ],
       "pricePer100g": 77,
-      "stockRemaining": 11.305,
+      "stockRemaining": 11.265,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -14596,7 +14840,7 @@
         "wraps"
       ],
       "pricePer100g": 21,
-      "stockRemaining": 14.560000000000004,
+      "stockRemaining": 14.260000000000003,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -14656,7 +14900,7 @@
         "wraps"
       ],
       "pricePer100g": 23,
-      "stockRemaining": 17.08000000000001,
+      "stockRemaining": 16.900000000000013,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -14806,7 +15050,7 @@
         "wraps"
       ],
       "pricePer100g": 28,
-      "stockRemaining": 22.859999999999996,
+      "stockRemaining": 22.829999999999995,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -15136,7 +15380,7 @@
         "wraps"
       ],
       "pricePer100g": 39,
-      "stockRemaining": 8.040000000000003,
+      "stockRemaining": 7.8400000000000025,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -15166,7 +15410,7 @@
         "wraps"
       ],
       "pricePer100g": 40,
-      "stockRemaining": 9.340000000000005,
+      "stockRemaining": 9.240000000000007,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -15196,7 +15440,7 @@
         "wraps"
       ],
       "pricePer100g": 41,
-      "stockRemaining": 10.040000000000003,
+      "stockRemaining": 9.840000000000005,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -15256,7 +15500,7 @@
         "wraps"
       ],
       "pricePer100g": 43,
-      "stockRemaining": 11.870000000000005,
+      "stockRemaining": 11.810000000000004,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -15286,7 +15530,7 @@
         "wraps"
       ],
       "pricePer100g": 44,
-      "stockRemaining": 13.430000000000005,
+      "stockRemaining": 13.310000000000006,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -15467,7 +15711,7 @@
         "iced_tea"
       ],
       "pricePer100g": 45,
-      "stockRemaining": 8.990000000000009,
+      "stockRemaining": 8.83000000000001,
       "stockMin": 5,
       "stockMax": 30,
       "nutritionPer100g": {
@@ -160691,9 +160935,11 @@
       "totalAmount": 6097,
       "totalWithGST": {
         "subTotal": 6097,
+        "discountPercent": 0,
+        "discountAmount": 0,
         "cgst": 152.43,
         "sgst": 152.43,
-        "total": 6402
+        "total": 6401.86
       },
       "items": [
         {
@@ -160746,7 +160992,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 1,
+          "price": 109
         },
         {
           "dishId": "corn_and_cheese_pizza",
@@ -160798,7 +161046,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 2,
+          "price": 129
         },
         {
           "dishId": "garden_fresh_pizza",
@@ -160850,7 +161100,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 4,
+          "price": 199
         },
         {
           "dishId": "triple_cheese_pizza",
@@ -160902,7 +161154,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 1,
+          "price": 199
         },
         {
           "dishId": "mushroom_white_sauce_pizza",
@@ -160954,7 +161208,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 2,
+          "price": 249
         },
         {
           "dishId": "buffalo_chicken_pizza",
@@ -161006,7 +161262,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 3,
+          "price": 329
         },
         {
           "dishId": "peri_peri_chicken_pizza",
@@ -161058,7 +161316,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 3,
+          "price": 329
         },
         {
           "dishId": "bbq_chicken_pizza",
@@ -161110,7 +161370,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 1,
+          "price": 329
         },
         {
           "dishId": "chicken_tikka_pizza",
@@ -161162,7 +161424,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 1,
+          "price": 329
         },
         {
           "dishId": "paneer_tikka_pizza",
@@ -161214,7 +161478,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 3,
+          "price": 309
         },
         {
           "dishId": "ultimate_chicken_pizza",
@@ -161266,7 +161532,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 4,
+          "price": 359
         },
         {
           "dishId": "meat_lovers_pizza",
@@ -161318,7 +161586,9 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 4,
+          "price": 359
         },
         {
           "dishId": "chicken_salami_pizza",
@@ -161370,9 +161640,13 @@
             }
           ],
           "createdAt": "2026-06-12T18:32:54.602Z",
-          "pickupAt": null
+          "pickupAt": null,
+          "billAssignment": 4,
+          "price": 359
         }
-      ]
+      ],
+      "splitType": "bill",
+      "splitBillCount": 4
     },
     {
       "id": "order_02095",
@@ -162210,7 +162484,7 @@
       "time": "11:45",
       "createdAt": "2026-06-18T06:15:05.885Z",
       "updatedAt": "2026-06-18T06:15:05.885Z",
-      "status": "placed",
+      "status": "preparing",
       "totalAmount": 497,
       "totalWithGST": {
         "subTotal": 497,
@@ -162226,12 +162500,899 @@
           "quantity": 1,
           "unitPrice": 497,
           "totalPrice": 497,
-          "status": "placed",
+          "status": "preparing",
           "isCustomized": false,
           "selectedSize": "regular",
           "notes": "",
           "ingredients": [],
-          "createdAt": "2026-06-18T06:15:05.885Z"
+          "createdAt": "2026-06-18T06:15:05.885Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02106",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-06-23",
+      "time": "22:15",
+      "createdAt": "2026-06-23T16:45:55.844Z",
+      "updatedAt": "2026-06-23T16:45:55.844Z",
+      "status": "preparing",
+      "totalAmount": 269,
+      "totalWithGST": {
+        "subTotal": 269,
+        "cgst": 6.73,
+        "sgst": 6.73,
+        "total": 282
+      },
+      "items": [
+        {
+          "dishId": "grilled_chicken_burger",
+          "dishName": "Grilled Chicken Burger",
+          "categoryId": "burger",
+          "quantity": 1,
+          "unitPrice": 269,
+          "totalPrice": 269,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Peas",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Veg Patty",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Sweet Potato",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Spinach",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Salt",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Olive Oil",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-06-23T16:45:55.844Z"
+        }
+      ]
+    },
+    {
+      "id": "order_02107",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-06-23",
+      "time": "22:18",
+      "createdAt": "2026-06-23T16:48:13.380Z",
+      "updatedAt": "2026-06-23T16:48:13.380Z",
+      "status": "cancelled",
+      "totalAmount": 1196,
+      "totalWithGST": {
+        "subTotal": 1196,
+        "cgst": 29.9,
+        "sgst": 29.9,
+        "total": 1256
+      },
+      "items": [
+        {
+          "dishId": "double_chicken_patty_burger",
+          "dishName": "Double Chicken Patty Burger",
+          "categoryId": "burger",
+          "quantity": 4,
+          "unitPrice": 299,
+          "totalPrice": 1196,
+          "status": "cancelled",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Chicken",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Coriander",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Red Chilli Flakes",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chilli Powder",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Rice",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chicken Mince",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-06-23T16:48:13.380Z",
+          "pickupAt": null
+        }
+      ],
+      "cancelReason": "customer went for an emergency",
+      "cancelledAt": "2026-07-12T06:42:21.358Z"
+    },
+    {
+      "id": "order_02108",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-16",
+      "time": "20:28",
+      "createdAt": "2026-07-16T14:58:23.428Z",
+      "updatedAt": "2026-07-16T14:58:23.428Z",
+      "status": "preparing",
+      "totalAmount": 219,
+      "totalWithGST": {
+        "subTotal": 219,
+        "cgst": 5.48,
+        "sgst": 5.48,
+        "total": 230
+      },
+      "items": [
+        {
+          "dishId": "paneer_burger",
+          "dishName": "Paneer Burger",
+          "categoryId": "burger",
+          "quantity": 1,
+          "unitPrice": 219,
+          "totalPrice": 219,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Mustard",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Brown Rice",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Garam Masala",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Mozzarella Cheese",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Potato",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Veg Patty",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-16T14:58:23.428Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02109",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-16",
+      "time": "20:31",
+      "createdAt": "2026-07-16T15:01:17.259Z",
+      "updatedAt": "2026-07-16T15:01:17.259Z",
+      "status": "preparing",
+      "totalAmount": 618,
+      "totalWithGST": {
+        "subTotal": 618,
+        "cgst": 15.45,
+        "sgst": 15.45,
+        "total": 649
+      },
+      "items": [
+        {
+          "dishId": "double_chicken_patty_burger",
+          "dishName": "Double Chicken Patty Burger",
+          "categoryId": "burger",
+          "quantity": 1,
+          "unitPrice": 299,
+          "totalPrice": 299,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Chicken",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Coriander",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Red Chilli Flakes",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chilli Powder",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Rice",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chicken Mince",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-16T15:01:17.259Z",
+          "pickupAt": null
+        },
+        {
+          "dishId": "double_chicken_double_cheese_burger",
+          "dishName": "Double Chicken Patty Double Cheese",
+          "categoryId": "burger",
+          "quantity": 1,
+          "unitPrice": 319,
+          "totalPrice": 319,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Chicken",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Coriander",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Red Chilli Flakes",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chilli Powder",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Rice",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chicken Mince",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-16T15:01:17.259Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02110",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-16",
+      "time": "20:32",
+      "createdAt": "2026-07-16T15:02:38.746Z",
+      "updatedAt": "2026-07-16T15:02:38.746Z",
+      "status": "preparing",
+      "totalAmount": 618,
+      "totalWithGST": {
+        "subTotal": 618,
+        "cgst": 15.45,
+        "sgst": 15.45,
+        "total": 649
+      },
+      "items": [
+        {
+          "dishId": "double_chicken_double_cheese_burger",
+          "dishName": "Double Chicken Patty Double Cheese",
+          "categoryId": "burger",
+          "quantity": 1,
+          "unitPrice": 319,
+          "totalPrice": 319,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Chicken",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Coriander",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Red Chilli Flakes",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chilli Powder",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Rice",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chicken Mince",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-16T15:02:38.746Z",
+          "pickupAt": null
+        },
+        {
+          "dishId": "double_chicken_patty_burger",
+          "dishName": "Double Chicken Patty Burger",
+          "categoryId": "burger",
+          "quantity": 1,
+          "unitPrice": 299,
+          "totalPrice": 299,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Chicken",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Coriander",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Red Chilli Flakes",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chilli Powder",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Rice",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chicken Mince",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-16T15:02:38.746Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02111",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-16",
+      "time": "21:05",
+      "createdAt": "2026-07-16T15:35:10.452Z",
+      "updatedAt": "2026-07-16T15:35:10.452Z",
+      "status": "preparing",
+      "totalAmount": 219,
+      "totalWithGST": {
+        "subTotal": 219,
+        "cgst": 5.48,
+        "sgst": 5.48,
+        "total": 230
+      },
+      "items": [
+        {
+          "dishId": "paneer_burger",
+          "dishName": "Paneer Burger",
+          "categoryId": "burger",
+          "quantity": 1,
+          "unitPrice": 219,
+          "totalPrice": 219,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Mustard",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Brown Rice",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Garam Masala",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Mozzarella Cheese",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Potato",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Veg Patty",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-16T15:35:10.452Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02112",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-23",
+      "time": "22:47",
+      "createdAt": "2026-07-23T17:17:18.593Z",
+      "updatedAt": "2026-07-23T17:17:18.593Z",
+      "status": "preparing",
+      "totalAmount": 438,
+      "totalWithGST": {
+        "subTotal": 438,
+        "cgst": 10.95,
+        "sgst": 10.95,
+        "total": 460
+      },
+      "items": [
+        {
+          "dishId": "paneer_burger",
+          "dishName": "Paneer Burger",
+          "categoryId": "burger",
+          "quantity": 2,
+          "unitPrice": 219,
+          "totalPrice": 438,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Mustard",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Brown Rice",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Garam Masala",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Mozzarella Cheese",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Potato",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Veg Patty",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-23T17:17:18.593Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02113",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-23",
+      "time": "22:50",
+      "createdAt": "2026-07-23T17:20:49.723Z",
+      "updatedAt": "2026-07-23T17:20:49.723Z",
+      "status": "preparing",
+      "totalAmount": 538,
+      "totalWithGST": {
+        "subTotal": 538,
+        "cgst": 13.45,
+        "sgst": 13.45,
+        "total": 565
+      },
+      "items": [
+        {
+          "dishId": "crispy_chicken_burger",
+          "dishName": "Crispy Chicken Burger",
+          "categoryId": "burger",
+          "quantity": 2,
+          "unitPrice": 269,
+          "totalPrice": 538,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "single",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Chicken",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Coriander",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Red Chilli Flakes",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chilli Powder",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Rice",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Chicken Mince",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-23T17:20:49.723Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02114",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-23",
+      "time": "22:51",
+      "createdAt": "2026-07-23T17:21:27.469Z",
+      "updatedAt": "2026-07-23T17:21:27.469Z",
+      "status": "preparing",
+      "totalAmount": 597,
+      "totalWithGST": {
+        "subTotal": 597,
+        "cgst": 14.93,
+        "sgst": 14.93,
+        "total": 627
+      },
+      "items": [
+        {
+          "dishId": "garden_fresh_pizza",
+          "dishName": "Garden Fresh Pizza",
+          "categoryId": "pizza",
+          "quantity": 3,
+          "unitPrice": 199,
+          "totalPrice": 597,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "regular",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Parsley",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Pizza Base",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Beef",
+              "quantity": 40,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Turmeric",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Jalapeno",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Paneer",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-23T17:21:27.469Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02115",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-23",
+      "time": "22:52",
+      "createdAt": "2026-07-23T17:22:12.678Z",
+      "updatedAt": "2026-07-23T17:22:12.678Z",
+      "status": "preparing",
+      "totalAmount": 458,
+      "totalWithGST": {
+        "subTotal": 458,
+        "cgst": 11.45,
+        "sgst": 11.45,
+        "total": 481
+      },
+      "items": [
+        {
+          "dishId": "veg_russian_salad",
+          "dishName": "Veg Russian Salad",
+          "categoryId": "salad",
+          "quantity": 2,
+          "unitPrice": 229,
+          "totalPrice": 458,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "regular",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Potato",
+              "quantity": 60,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Peas",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Carrot",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Mayonnaise",
+              "quantity": 25,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Sweet Corn",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Cucumber",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-23T17:22:12.678Z",
+          "pickupAt": null
+        }
+      ]
+    },
+    {
+      "id": "order_02116",
+      "userName": "Guest",
+      "mode": "take away",
+      "date": "2026-07-23",
+      "time": "22:52",
+      "createdAt": "2026-07-23T17:22:24.097Z",
+      "updatedAt": "2026-07-23T17:22:24.097Z",
+      "status": "preparing",
+      "totalAmount": 596,
+      "totalWithGST": {
+        "subTotal": 596,
+        "cgst": 14.9,
+        "sgst": 14.9,
+        "total": 626
+      },
+      "items": [
+        {
+          "dishId": "cream_of_spinach",
+          "dishName": "Cream Of Spinach",
+          "categoryId": "cream_soup",
+          "quantity": 4,
+          "unitPrice": 149,
+          "totalPrice": 596,
+          "status": "preparing",
+          "isCustomized": false,
+          "selectedSize": "cup",
+          "notes": "",
+          "ingredients": [
+            {
+              "name": "Spinach",
+              "quantity": 30,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Fresh Cream",
+              "quantity": 20,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Butter",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Garlic",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Pepper",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            },
+            {
+              "name": "Salt",
+              "quantity": 10,
+              "pricePer100g": 0,
+              "totalPrice": 0
+            }
+          ],
+          "createdAt": "2026-07-23T17:22:24.097Z",
+          "pickupAt": null
         }
       ]
     }
@@ -162817,6 +163978,101 @@
           "date": "2026-06-15",
           "status": "absent",
           "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-06",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-07",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-01",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-02",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-03",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-04",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-05",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-10",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-08",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-09",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-14",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-11",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-12",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-13",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-18",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-15",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-16",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-17",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-27",
+          "status": "unmarked",
+          "reason": ""
         }
       ],
       "remainingSalary": [
@@ -163404,6 +164660,101 @@
           "date": "2026-06-15",
           "status": "absent",
           "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-06",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-07",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-01",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-02",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-03",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-04",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-05",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-10",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-08",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-09",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-14",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-11",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-12",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-13",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-18",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-15",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-16",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-17",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-27",
+          "status": "unmarked",
+          "reason": ""
         }
       ]
     },
@@ -163981,6 +165332,101 @@
           "date": "2026-06-15",
           "status": "absent",
           "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-06",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-07",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-01",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-02",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-03",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-04",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-05",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-10",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-08",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-09",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-14",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-11",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-12",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-13",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-18",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-15",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-16",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-17",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-27",
+          "status": "unmarked",
+          "reason": ""
         }
       ]
     },
@@ -164567,6 +166013,101 @@
           "date": "2026-06-15",
           "status": "absent",
           "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-06",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-07",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-01",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-02",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-03",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-04",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-05",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-10",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-08",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-09",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-11",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-12",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-13",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-14",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-18",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-15",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-16",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-17",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-27",
+          "status": "unmarked",
+          "reason": ""
         }
       ]
     },
@@ -165144,6 +166685,101 @@
           "date": "2026-06-15",
           "status": "absent",
           "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-06",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-07",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-01",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-02",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-03",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-04",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-05",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-10",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-08",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-09",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-11",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-12",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-13",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-14",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-18",
+          "status": "unmarked",
+          "reason": ""
+        },
+        {
+          "date": "2026-07-15",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-16",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-17",
+          "status": "absent",
+          "reason": "Auto-marked absent"
+        },
+        {
+          "date": "2026-07-27",
+          "status": "unmarked",
+          "reason": ""
         }
       ]
     }
@@ -180357,20 +181993,7 @@
       }
     }
   },
-  "offers": [
-    {
-      "id": "offer_1781598103584",
-      "dishId": "cheese_balls_corn",
-      "categoryId": "veg_starters",
-      "percentage": 10,
-      "startDate": "2026-06-16",
-      "endDate": "2026-06-30",
-      "active": "yes",
-      "originalPrice": 199,
-      "offerAmount": 19,
-      "offerPrice": 180
-    }
-  ],
+  "offers": [],
   "reservations": [
     {
       "id": "res_1780978065966",
@@ -182258,7 +183881,10 @@
         13,
         14,
         15,
-        16
+        16,
+        17,
+        18,
+        19
       ]
     }
   ],
@@ -182343,9 +183969,7 @@
       "department": "Maintenance",
       "status": "Scheduled",
       "lastRate": "1"
-    }
-  ],
-  "serviceSchedules": [
+    },
     {
       "id": "ss_1780977450384",
       "work": "Pest control",
@@ -182356,6 +183980,7 @@
       "lastRate": "2"
     }
   ],
+  "serviceSchedules": [],
   "kitchenActivity": [
     {
       "id": "1",
@@ -182368,27 +183993,6 @@
       "work": "Fridge Service",
       "staff": "Thamu",
       "date": "2026-04-09"
-    }
-  ],
-  "kitchenSchedules": [
-    {
-      "id": "1",
-      "work": "Pest Control",
-      "staff": "Thamu",
-      "date": "2026-06-18",
-      "department": "Pest Control",
-      "status": "Completed",
-      "lastRate": "1",
-      "completedAt": "2026-06-09T03:58:46.704Z"
-    },
-    {
-      "id": 2,
-      "work": "Full washing",
-      "staff": "Rahul",
-      "date": "2026-06-16",
-      "department": "Laundry",
-      "status": "Scheduled",
-      "lastRate": "0"
     },
     {
       "id": 3,
@@ -182400,6 +184004,7 @@
       "lastRate": "1"
     }
   ],
+  "kitchenSchedules": [],
   "tasks": [
     {
       "id": "1",
@@ -182887,618 +184492,92 @@
   },
   "combo_offers": [
     {
-      "id": "offer_1",
-      "label": "Flat ₹200 OFF",
-      "type": "FLAT",
-      "value": 200,
-      "condition": {
-        "starter": "Masala Fries With Cheese Coated",
-        "starterPrice": 179,
-        "main": "Honey Glazed Chicken Steak",
-        "mainPrice": 399,
-        "beverages": "Espresso",
-        "beveragesPrice": 99
-      }
-    },
-    {
-      "id": "offer_2",
-      "label": "30% OFF",
-      "type": "PERCENT",
-      "value": 30,
-      "condition": {
-        "starter": "Chicken Popcorn",
-        "main": "Creamy Baked Chicken",
-        "starterPrice": 269,
-        "mainPrice": 379
-      }
-    },
-    {
-      "id": "offer_3",
-      "label": "Flat ₹150 OFF",
-      "type": "FLAT",
-      "value": 150,
-      "condition": {
-        "starter": "Antipasto Garlic Bread",
-        "main": "Corn Rice With Veggies In Cilantro Sauce",
-        "starterPrice": 129,
-        "mainPrice": 349
-      }
-    },
-    {
-      "id": "offer_4",
-      "label": "25% OFF",
-      "type": "PERCENT",
-      "value": 25,
-      "condition": {
-        "starter": "Paneer Tikka",
-        "main": "Cottage Cheese Shashlik",
-        "starterPrice": 249,
-        "mainPrice": 359
-      }
-    },
-    {
-      "id": "offer_5",
-      "label": "Flat ₹100 OFF",
-      "type": "FLAT",
-      "value": 100,
-      "condition": {
-        "starter": "Cheese Loaded Nachos With Salsa",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 179,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_6",
+      "id": "offer_combo_1",
       "label": "20% OFF",
       "type": "PERCENT",
       "value": 20,
       "condition": {
-        "starter": "Veg Quesadilla",
-        "main": "Tangy Crispy Chicken With Egg Fried Rice",
-        "starterPrice": 179,
-        "mainPrice": 369
+        "dishes": "Garden Fresh Pizza",
+        "dishesPrice": 199,
+        "desserts": "Chocolate Mousse",
+        "dessertsPrice": 219
       }
     },
     {
-      "id": "offer_7",
-      "label": "Flat ₹250 OFF",
+      "id": "offer_combo_2",
+      "label": "Flat ₹80 OFF",
       "type": "FLAT",
-      "value": 250,
+      "value": 80,
       "condition": {
-        "starter": "Chicken Wings",
-        "main": "Fish Steak",
-        "starterPrice": 0,
-        "mainPrice": 399
+        "dishes": "Corn And Cheese Pizza",
+        "dishesPrice": 129,
+        "desserts": "Chocolate Brownie",
+        "dessertsPrice": 199
       }
     },
     {
-      "id": "offer_8",
+      "id": "offer_combo_3",
       "label": "15% OFF",
       "type": "PERCENT",
       "value": 15,
       "condition": {
-        "starter": "Cheese Balls Corn",
-        "main": "Corn Rice With Veggies In Cilantro Sauce",
-        "starterPrice": 199,
-        "mainPrice": 349
+        "dishes": "Paneer Tikka Pizza",
+        "dishesPrice": 309,
+        "desserts": "Cheesecake",
+        "dessertsPrice": 199
       }
     },
     {
-      "id": "offer_9",
-      "label": "Flat ₹120 OFF",
+      "id": "offer_combo_4",
+      "label": "Flat ₹50 OFF",
       "type": "FLAT",
-      "value": 120,
+      "value": 50,
       "condition": {
-        "starter": "Mushroom 65",
-        "main": "Cottage Cheese Shashlik",
-        "starterPrice": 129,
-        "mainPrice": 359
+        "dishes": "Veg Delight Burger",
+        "dishesPrice": 179,
+        "beverages": "Regular Coffee",
+        "beveragesPrice": 49
       }
     },
     {
-      "id": "offer_10",
-      "label": "18% OFF",
-      "type": "PERCENT",
-      "value": 18,
-      "condition": {
-        "starter": "Paneer 65",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 179,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_11",
-      "label": "Flat ₹180 OFF",
-      "type": "FLAT",
-      "value": 180,
-      "condition": {
-        "starter": "Chicken Tikka",
-        "main": "Honey Glazed Chicken Steak",
-        "starterPrice": 299,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_12",
-      "label": "22% OFF",
-      "type": "PERCENT",
-      "value": 22,
-      "condition": {
-        "starter": "Mushroom Tikka",
-        "main": "Corn Rice With Veggies In Cilantro Sauce",
-        "starterPrice": 249,
-        "mainPrice": 349
-      }
-    },
-    {
-      "id": "offer_13",
-      "label": "Flat ₹160 OFF",
-      "type": "FLAT",
-      "value": 160,
-      "condition": {
-        "starter": "Chicken Cheese Balls",
-        "main": "Creamy Baked Chicken",
-        "starterPrice": 249,
-        "mainPrice": 379
-      }
-    },
-    {
-      "id": "offer_14",
-      "label": "28% OFF",
-      "type": "PERCENT",
-      "value": 28,
-      "condition": {
-        "starter": "Chicken 65",
-        "main": "Tangy Crispy Chicken With Egg Fried Rice",
-        "starterPrice": 249,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_15",
-      "label": "Flat ₹140 OFF",
-      "type": "FLAT",
-      "value": 140,
-      "condition": {
-        "starter": "Fish Fingers",
-        "main": "Fish Steak",
-        "starterPrice": 0,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_16",
-      "label": "17% OFF",
-      "type": "PERCENT",
-      "value": 17,
-      "condition": {
-        "starter": "Grilled Chicken",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 0,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_17",
-      "label": "Flat ₹130 OFF",
-      "type": "FLAT",
-      "value": 130,
-      "condition": {
-        "starter": "Spicy Chicken Strips",
-        "main": "Tangy Crispy Chicken With Egg Fried Rice",
-        "starterPrice": 0,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_18",
-      "label": "19% OFF",
-      "type": "PERCENT",
-      "value": 19,
-      "condition": {
-        "starter": "Crispy Chicken Breast",
-        "main": "Creamy Baked Chicken",
-        "starterPrice": 0,
-        "mainPrice": 379
-      }
-    },
-    {
-      "id": "offer_19",
-      "label": "Flat ₹210 OFF",
-      "type": "FLAT",
-      "value": 210,
-      "condition": {
-        "starter": "Prawn 65",
-        "main": "Fish Steak",
-        "starterPrice": 299,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_20",
-      "label": "16% OFF",
-      "type": "PERCENT",
-      "value": 16,
-      "condition": {
-        "starter": "Cheese Loaded Potato",
-        "main": "Corn Rice With Veggies In Cilantro Sauce",
-        "starterPrice": 179,
-        "mainPrice": 349
-      }
-    },
-    {
-      "id": "offer_21",
-      "label": "Flat ₹110 OFF",
-      "type": "FLAT",
-      "value": 110,
-      "condition": {
-        "starter": "Eight Treasures",
-        "main": "Cottage Cheese Shashlik",
-        "starterPrice": 179,
-        "mainPrice": 359
-      }
-    },
-    {
-      "id": "offer_22",
-      "label": "23% OFF",
-      "type": "PERCENT",
-      "value": 23,
-      "condition": {
-        "starter": "Hash Browns With Tartar Sauce",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 179,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_23",
-      "label": "Flat ₹170 OFF",
-      "type": "FLAT",
-      "value": 170,
-      "condition": {
-        "starter": "Veg Quesadilla",
-        "main": "Honey Glazed Chicken Steak",
-        "starterPrice": 179,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_24",
-      "label": "21% OFF",
-      "type": "PERCENT",
-      "value": 21,
-      "condition": {
-        "starter": "Paneer Tikka",
-        "main": "Tangy Crispy Chicken With Egg Fried Rice",
-        "starterPrice": 249,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_25",
-      "label": "Flat ₹190 OFF",
-      "type": "FLAT",
-      "value": 190,
-      "condition": {
-        "starter": "Chicken Wings",
-        "main": "Creamy Baked Chicken",
-        "starterPrice": 0,
-        "mainPrice": 379
-      }
-    },
-    {
-      "id": "offer_26",
-      "label": "14% OFF",
-      "type": "PERCENT",
-      "value": 14,
-      "condition": {
-        "starter": "Masala Fries With Cheese Coated",
-        "main": "Fish Steak",
-        "starterPrice": 179,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_27",
-      "label": "Flat ₹220 OFF",
-      "type": "FLAT",
-      "value": 220,
-      "condition": {
-        "starter": "Chicken Popcorn",
-        "main": "Honey Glazed Chicken Steak",
-        "starterPrice": 269,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_28",
-      "label": "26% OFF",
-      "type": "PERCENT",
-      "value": 26,
-      "condition": {
-        "starter": "Chicken 65",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 249,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_29",
-      "label": "Flat ₹125 OFF",
-      "type": "FLAT",
-      "value": 125,
-      "condition": {
-        "starter": "Mushroom 65",
-        "main": "Corn Rice With Veggies In Cilantro Sauce",
-        "starterPrice": 129,
-        "mainPrice": 349
-      }
-    },
-    {
-      "id": "offer_30",
-      "label": "24% OFF",
-      "type": "PERCENT",
-      "value": 24,
-      "condition": {
-        "starter": "Paneer 65",
-        "main": "Cottage Cheese Shashlik",
-        "starterPrice": 179,
-        "mainPrice": 359
-      }
-    },
-    {
-      "id": "offer_31",
-      "label": "Flat ₹155 OFF",
-      "type": "FLAT",
-      "value": 155,
-      "condition": {
-        "starter": "Cheese Balls Corn",
-        "main": "Tangy Crispy Chicken With Egg Fried Rice",
-        "starterPrice": 199,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_32",
-      "label": "18% OFF",
-      "type": "PERCENT",
-      "value": 18,
-      "condition": {
-        "starter": "Chicken Tikka",
-        "main": "Fish Steak",
-        "starterPrice": 299,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_33",
-      "label": "Flat ₹135 OFF",
-      "type": "FLAT",
-      "value": 135,
-      "condition": {
-        "starter": "Spicy Chicken Strips",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 0,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_34",
-      "label": "27% OFF",
-      "type": "PERCENT",
-      "value": 27,
-      "condition": {
-        "starter": "Grilled Chicken",
-        "main": "Honey Glazed Chicken Steak",
-        "starterPrice": 0,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_35",
-      "label": "Flat ₹165 OFF",
-      "type": "FLAT",
-      "value": 165,
-      "condition": {
-        "starter": "Chicken Cheese Balls",
-        "main": "Creamy Baked Chicken",
-        "starterPrice": 249,
-        "mainPrice": 379
-      }
-    },
-    {
-      "id": "offer_36",
-      "label": "20% OFF",
-      "type": "PERCENT",
-      "value": 20,
-      "condition": {
-        "starter": "Fish Fingers",
-        "main": "Tangy Crispy Chicken With Egg Fried Rice",
-        "starterPrice": 0,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_37",
-      "label": "Flat ₹145 OFF",
-      "type": "FLAT",
-      "value": 145,
-      "condition": {
-        "starter": "Prawn 65",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 299,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_38",
-      "label": "22% OFF",
-      "type": "PERCENT",
-      "value": 22,
-      "condition": {
-        "starter": "Chicken Wings",
-        "main": "Cottage Cheese Shashlik",
-        "starterPrice": 0,
-        "mainPrice": 359
-      }
-    },
-    {
-      "id": "offer_39",
-      "label": "Flat ₹175 OFF",
-      "type": "FLAT",
-      "value": 175,
-      "condition": {
-        "starter": "Chicken Popcorn",
-        "main": "Fish Steak",
-        "starterPrice": 269,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_40",
-      "label": "19% OFF",
-      "type": "PERCENT",
-      "value": 19,
-      "condition": {
-        "starter": "Paneer Tikka",
-        "main": "Creamy Baked Chicken",
-        "starterPrice": 249,
-        "mainPrice": 379
-      }
-    },
-    {
-      "id": "offer_41",
-      "label": "Flat ₹115 OFF",
-      "type": "FLAT",
-      "value": 115,
-      "condition": {
-        "starter": "Cheese Loaded Nachos With Salsa",
-        "main": "Corn Rice With Veggies In Cilantro Sauce",
-        "starterPrice": 179,
-        "mainPrice": 349
-      }
-    },
-    {
-      "id": "offer_42",
-      "label": "23% OFF",
-      "type": "PERCENT",
-      "value": 23,
-      "condition": {
-        "starter": "Veg Quesadilla",
-        "main": "Fish Steak",
-        "starterPrice": 179,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_43",
-      "label": "Flat ₹195 OFF",
-      "type": "FLAT",
-      "value": 195,
-      "condition": {
-        "starter": "Chicken 65",
-        "main": "Honey Glazed Chicken Steak",
-        "starterPrice": 249,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_44",
-      "label": "21% OFF",
-      "type": "PERCENT",
-      "value": 21,
-      "condition": {
-        "starter": "Mushroom Tikka",
-        "main": "Tangy Crispy Chicken With Egg Fried Rice",
-        "starterPrice": 249,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_45",
-      "label": "Flat ₹185 OFF",
-      "type": "FLAT",
-      "value": 185,
-      "condition": {
-        "starter": "Chicken Tikka",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 299,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_46",
+      "id": "offer_combo_5",
       "label": "25% OFF",
       "type": "PERCENT",
       "value": 25,
       "condition": {
-        "starter": "Grilled Chicken",
-        "main": "Fish Steak",
-        "starterPrice": 0,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_47",
-      "label": "Flat ₹205 OFF",
-      "type": "FLAT",
-      "value": 205,
-      "condition": {
-        "starter": "Chicken Wings",
-        "main": "Honey Glazed Chicken Steak",
-        "starterPrice": 0,
-        "mainPrice": 399
-      }
-    },
-    {
-      "id": "offer_48",
-      "label": "18% OFF",
-      "type": "PERCENT",
-      "value": 18,
-      "condition": {
-        "starter": "Paneer 65",
-        "main": "Creamy Baked Chicken",
-        "starterPrice": 179,
-        "mainPrice": 379
-      }
-    },
-    {
-      "id": "offer_49",
-      "label": "Flat ₹135 OFF",
-      "type": "FLAT",
-      "value": 135,
-      "condition": {
-        "starter": "Eight Treasures",
-        "main": "Chicken Parmigiana",
-        "starterPrice": 179,
-        "mainPrice": 369
-      }
-    },
-    {
-      "id": "offer_50",
-      "label": "20% OFF",
-      "type": "PERCENT",
-      "value": 20,
-      "condition": {
-        "starter": "Masala Fries With Cheese Coated",
-        "main": "Cottage Cheese Shashlik",
-        "starterPrice": 179,
-        "mainPrice": 359
-      }
-    },
-    {
-      "id": "offer_1781090524011_f3ecd",
-      "label": "Flat ₹20 OFF",
-      "type": "FLAT",
-      "value": 20,
-      "condition": {
-        "starter": "Garlic Bread With Minced Chicken",
-        "starterPrice": 169,
-        "beverages": "Regular Coffee",
-        "beveragesPrice": 49
+        "dishes": "Classic Chicken Burger",
+        "dishesPrice": 249,
+        "beverages": "Vanilla Milkshake",
+        "beveragesPrice": 149
       }
     }
-  ]
+  ],
+  "comboSectionConfig": {
+    "id": 1,
+    "sections": [
+      {
+        "key": "dishes",
+        "label": "Dishes",
+        "categoryIds": [
+          "pizza",
+          "burger",
+          "sandwichs"
+        ]
+      },
+      {
+        "key": "desserts",
+        "label": "Desserts",
+        "categoryIds": [
+          "desserts"
+        ]
+      },
+      {
+        "key": "beverages",
+        "label": "Beverages",
+        "categoryIds": [
+          "beverages"
+        ]
+      }
+    ]
+  }
 }
