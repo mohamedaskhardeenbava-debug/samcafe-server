@@ -1,4 +1,4 @@
-//Testing Branch MongoDB - v2
+//Testing Branch MongoDB
 require("dotenv").config();
 const dns = require("dns");
 const express = require("express");
@@ -54,9 +54,30 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
   .map((s) => s.trim())
   .filter(Boolean);
 
+// Every Vercel *preview* deployment gets its own random-hash subdomain
+// (e.g. sam-cafe-admin-testing-guczltlr2.vercel.app) that can never be
+// listed in a static ALLOWED_ORIGINS env var ahead of time. Accept any
+// preview subdomain of our known Vercel project names in addition to the
+// exact-match list above, so testing previews aren't CORS-blocked on
+// every new deploy. Tightened to specific project prefixes (rather than
+// all of *.vercel.app) so this can't be abused to allow arbitrary sites.
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/sam-cafe-admin(-[a-z0-9-]+)?\.vercel\.app$/,
+  /^https:\/\/sam-cafe-user(-[a-z0-9-]+)?\.vercel\.app$/,
+  /^https:\/\/samcafe(-[a-z0-9-]+)?\.vercel\.app$/,
+  /^https:\/\/samcafe-admin(-[a-z0-9-]+)?\.vercel\.app$/,
+];
+
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.length === 0) return true;
+  if (ALLOWED_ORIGINS.includes(origin)) return true;
+  return ALLOWED_ORIGIN_PATTERNS.some((re) => re.test(origin));
+}
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && (ALLOWED_ORIGINS.length === 0 || ALLOWED_ORIGINS.includes(origin))) {
+  if (isAllowedOrigin(origin)) {
     res.header("Access-Control-Allow-Origin", origin);
     res.header("Access-Control-Allow-Credentials", "true");
   }
@@ -97,14 +118,14 @@ function getModel(collectionName) {
   // createIndex() is a no-op if the index already exists, so this is safe
   // to run on every boot; it runs in the background and doesn't block
   // reads/writes against the collection while building.
-  model.collection.createIndex({ venueId: 1 }).catch(() => {});
-  model.collection.createIndex({ id: 1 }).catch(() => {});
+  model.collection.createIndex({ venueId: 1 }).catch(() => { });
+  model.collection.createIndex({ id: 1 }).catch(() => { });
   if (collectionName === "orders") {
     // Orders is the largest collection by far and is always read as one
     // big list per venue, most-recent-first — a compound index lets Mongo
     // satisfy that access pattern directly instead of scanning + sorting
     // in memory.
-    model.collection.createIndex({ venueId: 1, createdAt: -1 }).catch(() => {});
+    model.collection.createIndex({ venueId: 1, createdAt: -1 }).catch(() => { });
   }
   return model;
 }
@@ -861,6 +882,70 @@ app.get("/combo-offers/public", async (req, res) => {
     res.json(docs.map(stripMeta));
   } catch (err) {
     console.error("GET /combo-offers/public", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────
+   USER-PANEL MENU DATA — public read
+   The customer-facing user panel (Welcome/categories/menu pages) has
+   no admin session — it only ever holds a customer cookie or nothing
+   at all (guest). But categories, ingredients, favourites (curated
+   picks), combo, offers, tables, and events are all ARRAY_COLLECTIONS
+   behind requireAdminAuth above, the same problem already solved for
+   combo-offers/combo-section-config/category-cards. These give the
+   user panel the same read-only, unauthenticated access, resolved to
+   the main branch venue (the app is single-storefront; a specific
+   branch can be requested via ?venueId= once QR codes carry one).
+   Writes to these collections still go through the admin-gated routes.
+───────────────────────────────────────── */
+const PUBLIC_MENU_COLLECTIONS = [
+  "categories",
+  "ingredients",
+  "favourites",
+  "combo",
+  "offers",
+  "tables",
+  "events",
+];
+
+PUBLIC_MENU_COLLECTIONS.forEach((name) => {
+  app.get(`/${name}/public`, async (req, res) => {
+    try {
+      const { Venue } = venuesModule;
+      let venue = null;
+      if (req.query.venueId) {
+        venue = await Venue.findOne({ id: req.query.venueId }).lean();
+      }
+      if (!venue) {
+        venue = (await Venue.findOne({ isMainBranch: true }).lean()) || (await Venue.findOne().sort({ createdAt: 1 }).lean());
+      }
+      if (!venue) return res.json([]);
+
+      const docs = await getModel(name).find({ venueId: venue.id }).lean();
+      res.json(docs.map(stripMeta));
+    } catch (err) {
+      console.error(`GET /${name}/public`, err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+/* ─────────────────────────────────────────
+   THEME — public read
+   theme is a GLOBAL_SINGLETONS entry (see below), not venue-scoped,
+   but still sits behind requireAdminAuth like every other singleton
+   route. The user panel's ThemeToggle/App.js reads it on every load
+   with no admin session, so it needs the same public-read treatment.
+───────────────────────────────────────── */
+app.get("/theme/public", async (req, res) => {
+  try {
+    const doc = await getModel("theme").findOne({ id: "singleton" }).lean();
+    if (!doc) return res.json({});
+    const { _id, __v, id, ...rest } = doc;
+    res.json(rest);
+  } catch (err) {
+    console.error("GET /theme/public", err.message);
     res.status(500).json({ error: err.message });
   }
 });
