@@ -34,6 +34,76 @@ const { sendResetPasswordEmail } = require("./Mailer");
 
 const router = express.Router();
 
+// Generic-schema accessor for the `staff` collection (HR records) — used
+// to validate that a staffId passed to create-staff-account points to a
+// real staff record. Mirrors server.js's getModel() pattern but is kept
+// local here to avoid a circular require; mongoose.models[...] is
+// checked first since server.js may have already registered the same
+// collection name via its own generic schema.
+function getStaffModel() {
+  if (mongoose.models.staff) return mongoose.models.staff;
+  const anySchema = new mongoose.Schema({}, { strict: false, timestamps: false, versionKey: false, id: false });
+  return mongoose.model("staff", anySchema, "staff");
+}
+
+/**
+ * ensureAdminsHaveStaffRecords() — runs on every server startup, after
+ * ensureMainBranchAndBackfill(). Every login account must be linked to a
+ * real staff record (staffId), but that rule was added after some
+ * accounts already existed (e.g. accounts created directly against the
+ * database, or before create-staff-account enforced it) — those have
+ * staffId: null and show up with no staff info in the Login Accounts
+ * list. It also re-heals accounts whose linked staffId points at a
+ * record that was since deleted (e.g. someone deleted the HR record but
+ * left the login account in place) — a case earlier versions of this
+ * function left untouched, which is why a Super Admin account like a
+ * General Manager's could silently stop appearing on the Staffs page.
+ * Creates a minimal matching staff record for each affected account and
+ * back-links it. Safe to run every time: an admin whose staffId still
+ * resolves to a real staff doc is left untouched.
+ */
+async function ensureAdminsHaveStaffRecords() {
+  try {
+    const allAdmins = await Admin.find({});
+    if (allAdmins.length === 0) return;
+
+    const StaffModel = getStaffModel();
+    const staffIds = allAdmins.map((a) => a.staffId).filter(Boolean);
+    const existingStaff = staffIds.length > 0
+      ? await StaffModel.find({ id: { $in: staffIds } }).select("id").lean()
+      : [];
+    const existingStaffIds = new Set(existingStaff.map((s) => s.id));
+
+    // Orphaned = never linked, OR linked to a staffId that no longer
+    // exists (e.g. the HR record was deleted after linking).
+    const orphaned = allAdmins.filter((a) => !a.staffId || !existingStaffIds.has(a.staffId));
+    if (orphaned.length === 0) return;
+
+    let created = 0;
+    for (const admin of orphaned) {
+      const staffId = `staff_${(admin.name || "member").toLowerCase().replace(/\s+/g, "_")}_${Date.now()}_${crypto.randomBytes(3).toString("hex")}`;
+      await StaffModel.create({
+        id: staffId,
+        name: admin.name,
+        role: "Manager", // safe generic HR job title; the admin can change this from the Staffs page afterward
+        venueId: admin.venueId || null,
+        contact: admin.phone || "",
+        workType: "full-time",
+        employmentType: "permanent",
+        joiningDate: admin.createdAt ? new Date(admin.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+        previousExperience: [],
+        bank: { name: "", account: "", ifsc: "" },
+      });
+      admin.staffId = staffId;
+      await admin.save();
+      created += 1;
+    }
+    console.log(`Created ${created} staff record(s) for previously-unlinked or de-synced login account(s).`);
+  } catch (err) {
+    console.error("Failed to backfill staff records for admins:", err.message);
+  }
+}
+
 // Lazy require to avoid a circular dependency (auditLog.js doesn't need
 // auth.js, but keeping the require inside the function is defensive and
 // costs nothing since Node caches modules).
@@ -58,6 +128,59 @@ const ROLE_RANK = { Supervisor: 1, Manager: 2, "Super Admin": 3 };
 
 function isValidRolePair(roleGroup, roleTitle) {
   return !!ROLE_TREE[roleGroup] && ROLE_TREE[roleGroup].includes(roleTitle);
+}
+
+// Simple, standard email shape check — used wherever a login account's
+// email is set (create-staff-account, admin edit) so a malformed address
+// never reaches the database.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function isValidEmail(email) {
+  return typeof email === "string" && EMAIL_RE.test(email.trim());
+}
+
+/**
+ * CREATABLE_TITLES — staff-creation hierarchy (Requirement: staff page
+ * account creation/deletion, not open self-signup). Keyed by the
+ * creator's roleTitle, valued as the list of roleTitles they're allowed
+ * to create or delete accounts for. Super Admin (General Manager,
+ * Proprietor) bypasses this map entirely (checked separately below) and
+ * can create/delete anyone.
+ *
+ *   Chef             -> Sous Chef
+ *   Service Manager  -> Captain, Sous Chef, Chef   (Manager rank -> both Supervisor titles + peer Manager titles below is NOT intended;
+ *                        per spec: "service manager can do for captain and supervisor")
+ *   Captain          -> (a Supervisor title) -> Supervisor-rank titles below Captain: none defined, so Captain creates no one by default
+ *                        per spec: "captain can do for supervisor" — Captain can create Sous Chef/Captain-level (Supervisor rank) accounts
+ *
+ * Re-reading the spec literally: "chef can do for sous chef" (Manager ->
+ * Supervisor, same dept), "service manager can do for captain and
+ * supervisor" (Manager -> both Supervisor titles), "captain can do for
+ * supervisor" (Supervisor -> Supervisor rank, i.e. peer/lower titles).
+ * "Supervisor" here refers to the Supervisor RANK (Sous Chef + Captain),
+ * not a literal roleTitle (there isn't one).
+ */
+const CREATABLE_TITLES = {
+  Chef: ["Sous Chef"],
+  "Service Manager": ["Captain", "Sous Chef"],
+  Captain: ["Sous Chef", "Captain"],
+};
+
+/** canCreateRoleTitle(creatorAdmin, targetRoleTitle) */
+function canCreateRoleTitle(creator, targetRoleTitle) {
+  if (!creator) return false;
+  if (creator.roleGroup === "Super Admin") return true;
+  const allowed = CREATABLE_TITLES[creator.roleTitle] || [];
+  return allowed.includes(targetRoleTitle);
+}
+
+/** requireCanManageStaff — allows Super Admin, or a roleTitle present in
+ * CREATABLE_TITLES (i.e. someone with at least one creatable title below
+ * them). Route handlers still re-check canCreateRoleTitle per-target. */
+function requireCanManageStaff(req, res, next) {
+  if (!req.admin) return res.status(401).json({ error: "Not logged in" });
+  if (req.admin.roleGroup === "Super Admin") return next();
+  if (CREATABLE_TITLES[req.admin.roleTitle]) return next();
+  return res.status(403).json({ error: "Insufficient permissions" });
 }
 
 /**
@@ -96,7 +219,7 @@ const adminSchema = new mongoose.Schema(
     // manage every venue. Enforced in the signup/admin-edit routes below,
     // not at the schema level, so Super Admin creation isn't blocked.
     venueId: { type: String, default: null },
-    staffId: { type: String, default: null }, // optional link to HR `staff` record
+    staffId: { type: String, default: null }, // link to the HR `staff` record this account belongs to. Required for every NEW account (enforced in create-staff-account below) so every login is tied to a real staff member; nullable here only so older accounts created before this rule don't fail to load.
     phone: { type: String, default: "" },
     photo: { type: String, default: "" },
     status: { type: String, enum: ["active", "suspended"], default: "active" },
@@ -289,37 +412,77 @@ function requireMinRank(minGroup) {
    ROUTES
 ───────────────────────────────────────── */
 
-// POST /auth/signup  (create-account — self-serve signup for staff)
-router.post("/signup", async (req, res) => {
+/**
+ * POST /auth/create-staff-account — replaces open self-serve signup.
+ * Only a logged-in admin whose roleTitle appears in CREATABLE_TITLES (or
+ * Super Admin) may call this, and only to create an account at or below
+ * their permitted tier (see canCreateRoleTitle). The account is created
+ * with a temporary password the creator sets; the new staff member must
+ * change it via forgot-password (or is forced to on first login via
+ * mustResetPassword) before doing anything else.
+ *
+ * Non-Super-Admin creators may not choose a venueId — the new account is
+ * always pinned to the creator's own venue, since a Manager/Supervisor
+ * can only ever manage staff at their own branch.
+ */
+router.post("/create-staff-account", requireAuth, requireCanManageStaff, async (req, res) => {
   try {
-    const { name, email, password, roleGroup, roleTitle, staffId, phone, venueId } = req.body;
-    if (!name || !email || !password || !roleGroup || !roleTitle) {
-      return res.status(400).json({ error: "name, email, password, roleGroup, roleTitle are required" });
+    const { name, email, roleGroup, roleTitle, tempPassword, phone, staffId, venueId } = req.body;
+    if (!name || !email || !roleGroup || !roleTitle || !tempPassword) {
+      return res.status(400).json({ error: "name, email, roleGroup, roleTitle, tempPassword are required" });
+    }
+    if (!staffId) {
+      return res.status(400).json({ error: "staffId is required — every login account must be linked to a staff record" });
+    }
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: "Enter a valid email address" });
     }
     if (!isValidRolePair(roleGroup, roleTitle)) {
       return res.status(400).json({ error: "roleTitle does not belong to roleGroup" });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    if (tempPassword.length < 6) {
+      return res.status(400).json({ error: "Temporary password must be at least 6 characters" });
+    }
+    if (!canCreateRoleTitle(req.admin, roleTitle)) {
+      return res.status(403).json({ error: `You are not permitted to create a ${roleTitle} account` });
     }
 
-    // Every non-Super-Admin account must belong to a real venue. Super
-    // Admin accounts are global and must NOT be pinned to one venue.
+    const staffRecord = await getStaffModel().findOne({ id: staffId }).lean();
+    if (!staffRecord) {
+      return res.status(400).json({ error: "staffId does not match an existing staff record" });
+    }
+    // The login role must match the staff member's HR job title exactly —
+    // a Chef's login can't be created as a Captain, etc.
+    if (staffRecord.role !== roleTitle) {
+      return res.status(400).json({ error: `Login role must match the staff member's job role (${staffRecord.role})` });
+    }
+    const alreadyLinked = await Admin.findOne({ staffId }).lean();
+    if (alreadyLinked) {
+      return res.status(409).json({ error: "This staff member already has a login account" });
+    }
+
     let resolvedVenueId = null;
     if (roleGroup === "Super Admin") {
+      if (req.admin.roleGroup !== "Super Admin") {
+        return res.status(403).json({ error: "Only Super Admin can create Super Admin accounts" });
+      }
       resolvedVenueId = null;
-    } else {
+    } else if (req.admin.roleGroup === "Super Admin") {
+      // Super Admin may target any venue explicitly.
       if (!venueId) return res.status(400).json({ error: "venueId is required for this role" });
       const { Venue } = require("./venues");
       const venue = await Venue.findOne({ id: venueId }).lean();
       if (!venue) return res.status(400).json({ error: "venueId does not match an existing venue" });
       resolvedVenueId = venueId;
+    } else {
+      // Non-Super-Admin creators are pinned to their own venue.
+      resolvedVenueId = req.admin.venueId;
     }
 
     const existing = await Admin.findOne({ email: email.toLowerCase().trim() }).lean();
     if (existing) return res.status(409).json({ error: "Email already registered" });
 
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(tempPassword, 10);
     const admin = await Admin.create({
       id: newId("admin"),
       name,
@@ -328,17 +491,16 @@ router.post("/signup", async (req, res) => {
       roleGroup,
       roleTitle,
       venueId: resolvedVenueId,
-      staffId: staffId || null,
+      staffId,
       phone: phone || "",
+      mustResetPassword: true, // force the new staff member to set their own password on first login
     });
 
-    await createSession(admin.id, req, res);
     const safe = safeAdmin(admin);
-    req.admin = safe;
     await logAudit(req, { action: "create", resource: "admins", targetId: safe.id, after: safe });
     res.status(201).json({ admin: safe });
   } catch (err) {
-    console.error("POST /auth/signup", err.message);
+    console.error("POST /auth/create-staff-account", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -579,14 +741,65 @@ router.patch("/change-password", requireAuth, async (req, res) => {
    ADMIN MANAGEMENT (Super Admin only)
 ───────────────────────────────────────── */
 
-// GET /auth/admins — list all accounts (Super Admin only). Optional
-// ?venueId= filter lets the Super Admin venue switcher scope the list.
-router.get("/admins", requireAuth, requireRole("Super Admin"), async (req, res) => {
+// GET /auth/admins — Super Admin sees every account (optionally filtered
+// by ?venueId= for the venue switcher). A mid-tier admin who can manage
+// staff (CREATABLE_TITLES) instead sees only accounts at their own venue
+// whose roleTitle is one they're permitted to create/delete — i.e. the
+// same set the Staffs page account-creation control should offer.
+router.get("/admins", requireAuth, requireCanManageStaff, async (req, res) => {
   try {
-    const filter = {};
-    if (req.query.venueId) filter.venueId = req.query.venueId;
+    let filter = {};
+    if (req.admin.roleGroup === "Super Admin") {
+      if (req.query.venueId) filter.venueId = req.query.venueId;
+    } else {
+      filter = {
+        venueId: req.admin.venueId,
+        roleTitle: { $in: CREATABLE_TITLES[req.admin.roleTitle] || [] },
+      };
+    }
     const admins = await Admin.find(filter).lean();
-    res.json(admins.map(safeAdmin));
+
+    // Enrich each account with its linked staff record's HR job title,
+    // so the Login Accounts list can show which staff member (and what
+    // they actually do day-to-day) an account belongs to — see also
+    // GET /staff-auth/unlinked-staff for the reverse view (staff with no
+    // account yet).
+    const staffIds = admins.map((a) => a.staffId).filter(Boolean);
+    const staffRecords = staffIds.length > 0 ? await getStaffModel().find({ id: { $in: staffIds } }).lean() : [];
+    const staffById = new Map(staffRecords.map((s) => [s.id, s]));
+
+    res.json(
+      admins.map((a) => {
+        const safe = safeAdmin(a);
+        const staff = staffById.get(a.staffId);
+        return { ...safe, staffName: staff?.name || null, staffJobRole: staff?.role || null };
+      })
+    );
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /auth/unlinked-staff — staff records at the caller's scope that
+// don't yet have a login account, for the "Create Account" flow's staff
+// picker (so every account is created FROM an existing staff record
+// instead of a free-typed name/email, per the "every account holder
+// must be a staff member" requirement).
+router.get("/unlinked-staff", requireAuth, requireCanManageStaff, async (req, res) => {
+  try {
+    const staffFilter = {};
+    if (req.admin.roleGroup !== "Super Admin") {
+      staffFilter.venueId = req.admin.venueId;
+    } else if (req.query.venueId) {
+      staffFilter.venueId = req.query.venueId;
+    }
+    const [allStaff, linkedAdmins] = await Promise.all([
+      getStaffModel().find(staffFilter).lean(),
+      Admin.find({ staffId: { $ne: null } }).select("staffId").lean(),
+    ]);
+    const linkedIds = new Set(linkedAdmins.map((a) => a.staffId));
+    const unlinked = allStaff.filter((s) => !linkedIds.has(s.id));
+    res.json(unlinked.map((s) => ({ id: s.id, name: s.name, role: s.role, venueId: s.venueId })));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -638,16 +851,25 @@ router.patch("/admins/:id", requireAuth, requireRole("Super Admin"), async (req,
   }
 });
 
-// DELETE /auth/admins/:id
-router.delete("/admins/:id", requireAuth, requireRole("Super Admin"), async (req, res) => {
+// DELETE /auth/admins/:id — Super Admin can delete anyone. A mid-tier
+// admin (Chef, Service Manager, Captain) may only delete an account that
+// (a) is at their own venue and (b) has a roleTitle they're permitted to
+// create, per canCreateRoleTitle — i.e. strictly-lower-in-hierarchy staff.
+router.delete("/admins/:id", requireAuth, requireCanManageStaff, async (req, res) => {
   try {
     const before = await Admin.findOne({ id: req.params.id }).lean();
+    if (!before) return res.status(404).json({ error: "Account not found" });
+
+    if (req.admin.roleGroup !== "Super Admin") {
+      if (before.venueId !== req.admin.venueId || !canCreateRoleTitle(req.admin, before.roleTitle)) {
+        return res.status(403).json({ error: "You are not permitted to delete this account" });
+      }
+    }
+
     await Admin.deleteOne({ id: req.params.id });
     await Session.deleteMany({ adminId: req.params.id });
     invalidateAuthCache();
-    if (before) {
-      await logAudit(req, { action: "delete", resource: "admins", targetId: req.params.id, before: safeAdmin(before) });
-    }
+    await logAudit(req, { action: "delete", resource: "admins", targetId: req.params.id, before: safeAdmin(before) });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -764,6 +986,9 @@ module.exports = {
   requireAuth,
   requireRole,
   requireMinRank,
+  requireCanManageStaff,
+  canCreateRoleTitle,
+  CREATABLE_TITLES,
   ROLE_TREE,
   ROLE_RANK,
   DEPARTMENT_BY_ROLE_TITLE,
@@ -772,4 +997,5 @@ module.exports = {
   Session,
   Todo,
   invalidateAuthCache,
+  ensureAdminsHaveStaffRecords,
 };

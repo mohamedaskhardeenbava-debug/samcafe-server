@@ -16,10 +16,14 @@ const {
   requireAuth: requireAdminAuth,
   requireRole: requireAdminRole,
   requireMinRank: requireAdminMinRank,
+  requireCanManageStaff: requireAdminCanManageStaff,
   Admin,
+  ensureAdminsHaveStaffRecords,
 } = require("./auth");
 const venuesModule = require("./venues");
 const permissionsModule = require("./permissions");
+const rolesModule = require("./roles");
+const workPlanModule = require("./workPlan");
 const auditLogModule = require("./auditLog");
 const { logAudit } = auditLogModule;
 const { hasPermission } = permissionsModule;
@@ -717,6 +721,21 @@ ARRAY_COLLECTIONS.forEach((name) => {
       const result = stripMeta(doc);
       emitChange(name, "deleted", result);
       await logAudit(req, { action: "delete", resource: name, targetId: result.id, before: result });
+
+      // Every login account must be linked to a real staff record — if
+      // the staff record itself is deleted, its login account (if any)
+      // is deleted along with it, so an account can never outlive the
+      // staff member it belongs to. Session cleanup mirrors the
+      // DELETE /staff-auth/admins/:id route.
+      if (name === "staff") {
+        const { Admin, Session } = require("./auth");
+        const linkedAccount = await Admin.findOneAndDelete({ staffId: result.id }).lean();
+        if (linkedAccount) {
+          await Session.deleteMany({ adminId: linkedAccount.id });
+          await logAudit(req, { action: "delete", resource: "admins", targetId: linkedAccount.id, before: linkedAccount });
+        }
+      }
+
       res.json(result);
     } catch (err) {
       console.error(`DELETE /${name}/:id`, err.message);
@@ -820,6 +839,62 @@ VENUE_SINGLETONS.forEach((name) => {
       res.status(500).json({ error: err.message });
     }
   });
+});
+
+/* ─────────────────────────────────────────
+   COMBO OFFERS — public read
+   Powers the "Offer applied" notification banner in the user-panel
+   Combo builder (ComboPage.js) — same problem and same fix as
+   combo-section-config/public above: combo_offers is an ARRAY_COLLECTION
+   behind requireAdminAuth, but the user panel only ever holds a customer
+   session. Read-only; writes still go through the Super-Admin-gated
+   /combo_offers route. Resolves to the main branch for the same reason
+   documented on combo-section-config/public.
+───────────────────────────────────────── */
+app.get("/combo-offers/public", async (req, res) => {
+  try {
+    const { Venue } = venuesModule;
+    const mainBranch = (await Venue.findOne({ isMainBranch: true }).lean()) || (await Venue.findOne().sort({ createdAt: 1 }).lean());
+    if (!mainBranch) return res.json([]);
+
+    const docs = await getModel("combo_offers").find({ venueId: mainBranch.id }).lean();
+    res.json(docs.map(stripMeta));
+  } catch (err) {
+    console.error("GET /combo-offers/public", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────
+   COMBO SECTION CONFIG — public read
+   The user-panel Combo page (ComboPage.js) needs to read the admin's
+   category → combo-section mapping (Manage Combo Categories), but that
+   config lives in the venue-scoped comboSectionConfig singleton behind
+   requireAdminAuth — the user panel is a public/customer surface that
+   only ever holds a customer session cookie, never an admin one, so it
+   can never satisfy that check. Mirrors GET /category-cards/public
+   above: a dedicated, read-only, unauthenticated route for the one
+   customer-facing page that needs this data.
+   The user panel has no venue concept of its own (single-storefront
+   app), so this always resolves to whichever venue is currently marked
+   as the main branch — falling back to the oldest-created venue if none
+   is explicitly marked yet, matching ensureMainBranchAndBackfill()'s own
+   fallback logic below.
+───────────────────────────────────────── */
+app.get("/combo-section-config/public", async (req, res) => {
+  try {
+    const { Venue } = venuesModule;
+    const mainBranch = (await Venue.findOne({ isMainBranch: true }).lean()) || (await Venue.findOne().sort({ createdAt: 1 }).lean());
+    if (!mainBranch) return res.json({ sections: [] });
+
+    const doc = await getModel("comboSectionConfig").findOne({ id: singletonIdFor("comboSectionConfig", mainBranch.id) }).lean();
+    if (!doc) return res.json({ sections: [] });
+    const { _id, __v, id, ...rest } = doc;
+    res.json(rest);
+  } catch (err) {
+    console.error("GET /combo-section-config/public", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 /* ─────────────────────────────────────────
@@ -1078,6 +1153,22 @@ app.use(
   permissionsModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole, logAudit })
 );
 app.use(
+  "/roles",
+  rolesModule.buildRouter({
+    requireAuth: requireAdminAuth,
+    requireRole: requireAdminRole,
+    logAudit,
+  })
+);
+app.use(
+  "/work-plan",
+  workPlanModule.buildRouter({
+    requireAuth: requireAdminAuth,
+    requireRole: requireAdminRole,
+    logAudit,
+  })
+);
+app.use(
   "/audit-logs",
   auditLogModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole })
 );
@@ -1158,12 +1249,84 @@ async function ensureMainBranchAndBackfill() {
   return mainBranch;
 }
 
+/**
+ * resetMonthlySalaryFieldsIfNeeded — advance, deduction, penalty, bonus,
+ * and overtime on every staff member's salary record are per-month
+ * figures (Salary Management page), not running totals, so they need to
+ * clear back to 0 at the start of each new calendar month rather than
+ * carrying over. `remainingSalary` is a 1-element array holding the
+ * current record — this zeroes those five fields on every element
+ * (structurally always one) while leaving `advance`'s historical
+ * carry-forward alone, since only these five reset.
+ *
+ * A marker doc (in a tiny dedicated "salaryResetState" collection)
+ * records the last month this ran for, so it's a no-op on every server
+ * restart within the same month, and only actually resets once when the
+ * month first rolls over — checked both at startup and periodically
+ * (below), since a long-running process wouldn't otherwise notice the
+ * month changing without a restart.
+ */
+const SalaryResetState = mongoose.model(
+  "SalaryResetState",
+  new mongoose.Schema({ id: String, lastResetMonth: String }, { versionKey: false }),
+  "salaryResetState"
+);
+
+async function resetMonthlySalaryFieldsIfNeeded() {
+  try {
+    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+    const state = await SalaryResetState.findOneAndUpdate(
+      { id: "singleton" },
+      { $setOnInsert: { id: "singleton", lastResetMonth: currentMonth } },
+      { upsert: true, new: true }
+    );
+    if (state.lastResetMonth === currentMonth) return; // already reset (or just initialized) for this month
+
+    const StaffModel = getModel("staff");
+    // $expr lets `remaining`/`salaryRemaining` reset to each staff
+    // member's own base salary (not a flat 0), matching what the UI
+    // would compute once every add-on/deduction field is back to zero.
+    const result = await StaffModel.updateMany(
+      { "remainingSalary.0": { $exists: true } },
+      [
+        {
+          $set: {
+            remainingSalary: {
+              $map: {
+                input: "$remainingSalary",
+                in: {
+                  $mergeObjects: [
+                    "$$this",
+                    { advance: 0, deduction: 0, penalty: 0, bonus: 0, overtime: 0, remaining: { $ifNull: ["$salary", 0] } },
+                  ],
+                },
+              },
+            },
+            salaryRemaining: { $ifNull: ["$salary", 0] },
+          },
+        },
+      ]
+    );
+    await SalaryResetState.updateOne({ id: "singleton" }, { $set: { lastResetMonth: currentMonth } });
+    console.log(`[salary-reset] Reset monthly salary fields on ${result.modifiedCount} staff record(s) for ${currentMonth}.`);
+  } catch (err) {
+    console.error("[salary-reset] Failed to reset monthly salary fields:", err.message);
+  }
+}
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(async () => {
     console.log("Connected to MongoDB");
     await ensureMainBranchAndBackfill();
+    await ensureAdminsHaveStaffRecords();
     await permissionsModule.seedDefaultPermissions();
+    await rolesModule.ensureDefaultRoles();
+    await rolesModule.retireRemovedRoles();
+    await resetMonthlySalaryFieldsIfNeeded();
+    // Re-check every 6 hours so a long-running process (no restart)
+    // still resets promptly after midnight on the 1st of the month.
+    setInterval(resetMonthlySalaryFieldsIfNeeded, 6 * 60 * 60 * 1000);
     httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on port ${PORT}`);
     });

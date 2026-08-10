@@ -29,6 +29,7 @@ const venueSchema = new mongoose.Schema(
     address: { type: String, required: true, trim: true }, // branch address
     area: { type: String, required: true, trim: true }, // generalized location / branch area
     status: { type: String, enum: ["active", "inactive"], default: "active" },
+    isMainBranch: { type: Boolean, default: false }, // exactly one venue may be true at a time — see PATCH /venues/:id/set-main
     createdBy: { type: String, default: null }, // admin id
   },
   { timestamps: true, versionKey: false }
@@ -104,6 +105,29 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       const result = safeVenue(venue);
       await logAudit(req, { action: "create", resource: "venues", targetId: result.id, after: result });
       res.status(201).json(result);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // PATCH /venues/:id/set-main — Super Admin only. Marks this venue as the
+  // main branch and unsets isMainBranch on every other venue, so exactly
+  // one venue is ever the main branch at a time. Non-main branches are
+  // displayed on the frontend as "<Branch Name> (<Main Branch Name>)",
+  // with the parenthetical rendered at lower opacity.
+  router.patch("/:id/set-main", requireAuth, requireRole("Super Admin"), async (req, res) => {
+    try {
+      const target = await Venue.findOne({ id: req.params.id });
+      if (!target) return res.status(404).json({ error: "Venue not found" });
+
+      await Venue.updateMany({ id: { $ne: req.params.id } }, { $set: { isMainBranch: false } });
+      target.isMainBranch = true;
+      await target.save();
+
+      const result = safeVenue(target);
+      await logAudit(req, { action: "update", resource: "venues", targetId: result.id, after: { isMainBranch: true } });
+      const venues = await Venue.find().sort({ name: 1 }).lean();
+      res.json(venues.map(safeVenue));
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
