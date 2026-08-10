@@ -631,6 +631,76 @@ function scopeVenueForCreate(req) {
   return req.admin.venueId;
 }
 
+/* ─────────────────────────────────────────
+   USER-PANEL MENU DATA — public read
+   The customer-facing user panel (Welcome/categories/menu pages) has
+   no admin session — it only ever holds a customer cookie or nothing
+   at all (guest). But categories, ingredients, favourites (curated
+   picks), combo, offers, tables, and events are all ARRAY_COLLECTIONS
+   behind requireAdminAuth below, the same problem already solved for
+   combo-offers/combo-section-config/category-cards. These give the
+   user panel the same read-only, unauthenticated access, resolved to
+   the main branch venue (the app is single-storefront; a specific
+   branch can be requested via ?venueId= once QR codes carry one).
+   Writes to these collections still go through the admin-gated routes.
+
+   MUST be registered before ARRAY_COLLECTIONS.forEach below: Express
+   matches routes in registration order, and that loop registers
+   GET /:name/:id for each collection. If /combo/public were registered
+   after that, "public" would match :id on the admin-gated route first
+   and never reach this handler — which is exactly what was happening.
+───────────────────────────────────────── */
+const PUBLIC_MENU_COLLECTIONS = [
+  "categories",
+  "ingredients",
+  "favourites",
+  "combo",
+  "offers",
+  "tables",
+  "events",
+];
+
+PUBLIC_MENU_COLLECTIONS.forEach((name) => {
+  app.get(`/${name}/public`, async (req, res) => {
+    try {
+      const { Venue } = venuesModule;
+      let venue = null;
+      if (req.query.venueId) {
+        venue = await Venue.findOne({ id: req.query.venueId }).lean();
+      }
+      if (!venue) {
+        venue = (await Venue.findOne({ isMainBranch: true }).lean()) || (await Venue.findOne().sort({ createdAt: 1 }).lean());
+      }
+      if (!venue) return res.json([]);
+
+      const docs = await getModel(name).find({ venueId: venue.id }).lean();
+      res.json(docs.map(stripMeta));
+    } catch (err) {
+      console.error(`GET /${name}/public`, err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+/* ─────────────────────────────────────────
+   THEME — public read
+   theme is a GLOBAL_SINGLETONS entry (see below), not venue-scoped,
+   but still sits behind requireAdminAuth like every other singleton
+   route. The user panel's ThemeToggle/App.js reads it on every load
+   with no admin session, so it needs the same public-read treatment.
+───────────────────────────────────────── */
+app.get("/theme/public", async (req, res) => {
+  try {
+    const doc = await getModel("theme").findOne({ id: "singleton" }).lean();
+    if (!doc) return res.json({});
+    const { _id, __v, id, ...rest } = doc;
+    res.json(rest);
+  } catch (err) {
+    console.error("GET /theme/public", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 ARRAY_COLLECTIONS.forEach((name) => {
   const base = `/${name}`;
 
@@ -882,70 +952,6 @@ app.get("/combo-offers/public", async (req, res) => {
     res.json(docs.map(stripMeta));
   } catch (err) {
     console.error("GET /combo-offers/public", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ─────────────────────────────────────────
-   USER-PANEL MENU DATA — public read
-   The customer-facing user panel (Welcome/categories/menu pages) has
-   no admin session — it only ever holds a customer cookie or nothing
-   at all (guest). But categories, ingredients, favourites (curated
-   picks), combo, offers, tables, and events are all ARRAY_COLLECTIONS
-   behind requireAdminAuth above, the same problem already solved for
-   combo-offers/combo-section-config/category-cards. These give the
-   user panel the same read-only, unauthenticated access, resolved to
-   the main branch venue (the app is single-storefront; a specific
-   branch can be requested via ?venueId= once QR codes carry one).
-   Writes to these collections still go through the admin-gated routes.
-───────────────────────────────────────── */
-const PUBLIC_MENU_COLLECTIONS = [
-  "categories",
-  "ingredients",
-  "favourites",
-  "combo",
-  "offers",
-  "tables",
-  "events",
-];
-
-PUBLIC_MENU_COLLECTIONS.forEach((name) => {
-  app.get(`/${name}/public`, async (req, res) => {
-    try {
-      const { Venue } = venuesModule;
-      let venue = null;
-      if (req.query.venueId) {
-        venue = await Venue.findOne({ id: req.query.venueId }).lean();
-      }
-      if (!venue) {
-        venue = (await Venue.findOne({ isMainBranch: true }).lean()) || (await Venue.findOne().sort({ createdAt: 1 }).lean());
-      }
-      if (!venue) return res.json([]);
-
-      const docs = await getModel(name).find({ venueId: venue.id }).lean();
-      res.json(docs.map(stripMeta));
-    } catch (err) {
-      console.error(`GET /${name}/public`, err.message);
-      res.status(500).json({ error: err.message });
-    }
-  });
-});
-
-/* ─────────────────────────────────────────
-   THEME — public read
-   theme is a GLOBAL_SINGLETONS entry (see below), not venue-scoped,
-   but still sits behind requireAdminAuth like every other singleton
-   route. The user panel's ThemeToggle/App.js reads it on every load
-   with no admin session, so it needs the same public-read treatment.
-───────────────────────────────────────── */
-app.get("/theme/public", async (req, res) => {
-  try {
-    const doc = await getModel("theme").findOne({ id: "singleton" }).lean();
-    if (!doc) return res.json({});
-    const { _id, __v, id, ...rest } = doc;
-    res.json(rest);
-  } catch (err) {
-    console.error("GET /theme/public", err.message);
     res.status(500).json({ error: err.message });
   }
 });
