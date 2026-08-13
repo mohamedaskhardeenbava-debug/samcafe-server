@@ -37,6 +37,16 @@ dns.setServers(["8.8.8.8", "1.1.1.1"]);
    APP + SOCKET SETUP
 ───────────────────────────────────────── */
 const app = express();
+
+// Render (and most PaaS hosts) terminate TLS at a reverse proxy in front
+// of this app, so Express sees plain HTTP internally. Without trusting
+// that proxy, Express can't correctly determine the request was actually
+// HTTPS, which breaks `secure: true` cookies (they get silently dropped
+// instead of set) — the exact cause of every route 401ing in production
+// while working fine on localhost. Must be set before any cookies are
+// issued.
+app.set("trust proxy", 1);
+
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: "*", methods: ["GET", "POST", "PUT", "PATCH", "DELETE"] },
@@ -107,14 +117,14 @@ function getModel(collectionName) {
   // createIndex() is a no-op if the index already exists, so this is safe
   // to run on every boot; it runs in the background and doesn't block
   // reads/writes against the collection while building.
-  model.collection.createIndex({ venueId: 1 }).catch(() => {});
-  model.collection.createIndex({ id: 1 }).catch(() => {});
+  model.collection.createIndex({ venueId: 1 }).catch(() => { });
+  model.collection.createIndex({ id: 1 }).catch(() => { });
   if (collectionName === "orders") {
     // Orders is the largest collection by far and is always read as one
     // big list per venue, most-recent-first — a compound index lets Mongo
     // satisfy that access pattern directly instead of scanning + sorting
     // in memory.
-    model.collection.createIndex({ venueId: 1, createdAt: -1 }).catch(() => {});
+    model.collection.createIndex({ venueId: 1, createdAt: -1 }).catch(() => { });
   }
   return model;
 }
