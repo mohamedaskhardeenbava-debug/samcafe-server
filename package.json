@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "seed": "node seed.js",
-    "fix-ids": "node fixDuplicateSubCategoryIds.js"
+    "seed": "node seed.js"
   },
   "keywords": [],
   "author": "",

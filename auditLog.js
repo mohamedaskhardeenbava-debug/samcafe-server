@@ -117,8 +117,25 @@ function buildRouter({ requireAuth, requireRole }) {
       // is present, pull the date-filtered set into memory, filter by
       // local time-of-day, then paginate the result ourselves.
       let logs, total;
+      const listProjection = {
+        id: 1, adminId: 1, adminName: 1, adminRoleTitle: 1, venueId: 1,
+        action: 1, resource: 1, targetId: 1, ip: 1, userAgent: 1, createdAt: 1,
+        // Existence-only booleans so the list can decide whether to show
+        // the "Details" button without pulling the full (potentially
+        // large) before/after snapshot documents over the wire.
+        hasBefore: { $cond: [{ $ifNull: ["$before", false] }, true, false] },
+        hasAfter: { $cond: [{ $ifNull: ["$after", false] }, true, false] },
+      };
       if (fromTime || toTime) {
-        const all = await AuditLog.find(filter).sort({ createdAt: -1 }).lean();
+        // Time-of-day filtering still needs the lightweight projection
+        // applied up front — same reasoning as the else-branch below,
+        // just via aggregate() since it can't be expressed as a Mongo
+        // range and has to be filtered in memory.
+        const all = await AuditLog.aggregate([
+          { $match: filter },
+          { $sort: { createdAt: -1 } },
+          { $project: listProjection },
+        ]);
         const inTimeRange = (d) => {
           const hh = String(d.getHours()).padStart(2, "0");
           const mm = String(d.getMinutes()).padStart(2, "0");
@@ -132,17 +149,31 @@ function buildRouter({ requireAuth, requireRole }) {
         logs = matched.slice((page - 1) * limit, (page - 1) * limit + limit);
       } else {
         [logs, total] = await Promise.all([
-          AuditLog.find(filter)
-            .sort({ createdAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .lean(),
+          // The list view only renders when/who/venue/action/module/target —
+          // before/after (the full document snapshots) are only needed on
+          // the single-entry details page, which fetches by id separately.
+          // Projecting them down to existence booleans here cuts the
+          // per-page payload substantially, especially for update actions
+          // with large before/after objects.
+          AuditLog.aggregate([
+            { $match: filter },
+            { $sort: { createdAt: -1 } },
+            { $skip: (page - 1) * limit },
+            { $limit: limit },
+            { $project: listProjection },
+          ]),
           AuditLog.countDocuments(filter),
         ]);
       }
 
       res.json({
-        logs: logs.map((l) => ({ ...l, _id: undefined })),
+        logs: logs.map((l) => ({
+          ...l,
+          _id: undefined,
+          hasDetails: Boolean(l.hasBefore || l.hasAfter),
+          hasBefore: undefined,
+          hasAfter: undefined,
+        })),
         total,
         page,
         limit,
