@@ -317,7 +317,9 @@ async function createSession(adminId, req, res) {
     ip: req.ip,
     expiresAt: new Date(Date.now() + SESSION_TTL_MS),
   });
-  res.cookie(SESSION_COOKIE, sessionId, cookieOpts());
+  const opts = cookieOpts();
+  console.log("[cookie debug] setting session cookie with options:", JSON.stringify(opts), "req.secure:", req.secure, "x-forwarded-proto:", req.headers["x-forwarded-proto"]);
+  res.cookie(SESSION_COOKIE, sessionId, opts);
   return sessionId;
 }
 
