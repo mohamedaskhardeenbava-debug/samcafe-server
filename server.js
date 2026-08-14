@@ -1225,6 +1225,17 @@ app.use(
     logAudit,
   })
 );
+// TEMPORARY DIAGNOSTIC — remove after debugging the cookie/SameSite issue.
+// Reports config the server is actually running with, without exposing secrets.
+app.get("/__debug_cookie_config", (_req, res) => {
+  res.json({
+    NODE_ENV: process.env.NODE_ENV || null,
+    isProd_would_be: process.env.NODE_ENV === "production",
+    trustProxySetting: app.get("trust proxy"),
+    debugMarker: "trust-proxy-fix-v1", // bump this string each time you redeploy to confirm freshness
+  });
+});
+
 app.use(
   "/work-plan",
   workPlanModule.buildRouter({
