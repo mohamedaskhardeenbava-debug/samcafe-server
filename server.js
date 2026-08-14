@@ -675,6 +675,39 @@ function scopeVenueForCreate(req) {
   return req.admin.venueId;
 }
 
+/**
+ * Public menu-browsing routes — no session required at all.
+ *
+ * The user panel's fetchMenu() needs categories/ingredients/combo/offers/
+ * tables/events before a customer has ever logged in (or even created an
+ * account) — that's the whole point of browsing a menu. These were
+ * previously served by the generic ARRAY_COLLECTIONS routes below, which
+ * are gated by requireAdminAuth — correct for the admin panel's writes,
+ * but wrong for a guest's read-only menu view, and the actual cause of
+ * every "Failed to load menu" 401 a first-time visitor saw. Root-caused
+ * the same session as the /users/me/favourites fix (same underlying
+ * pattern: a customer-facing call was hitting an admin-only route).
+ *
+ * Kept intentionally narrow and read-only — only the exact collections
+ * fetchMenu() actually needs for guest browsing. Orders/favourites for a
+ * *specific* customer still correctly require a session (see /auth/me,
+ * /orders/mine, /users/me/favourites above) — a public route can't know
+ * who's asking, so those aren't included here.
+ */
+const PUBLIC_MENU_COLLECTIONS = ["categories", "ingredients", "combo", "offers", "tables", "events"];
+PUBLIC_MENU_COLLECTIONS.forEach((name) => {
+  app.get(`/public/${name}`, async (req, res) => {
+    try {
+      const filter = req.query.venueId ? { venueId: req.query.venueId } : {};
+      const docs = await getModel(name).find(filter).lean();
+      res.json(docs.map(stripMeta));
+    } catch (err) {
+      console.error(`GET /public/${name}`, err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
 ARRAY_COLLECTIONS.forEach((name) => {
   const base = `/${name}`;
 
@@ -993,6 +1026,20 @@ app.get("/category-cards/public", async (req, res) => {
    its admin-panel-facing route (see the public read route above for
    the user-panel-facing counterpart).
 ───────────────────────────────────────── */
+// Public theme read — the customer app needs this to render its UI theme
+// before any login, same reasoning as PUBLIC_MENU_COLLECTIONS above.
+app.get("/public/theme", async (_req, res) => {
+  try {
+    const doc = await getModel("theme").findOne({ id: "singleton" }).lean();
+    if (!doc) return res.json({});
+    const { _id, __v, id, ...rest } = doc;
+    res.json(rest);
+  } catch (err) {
+    console.error("GET /public/theme", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 GLOBAL_SINGLETONS.forEach((name) => {
   const base = `/${name}`;
 
@@ -1206,9 +1253,6 @@ io.on("connection", (socket) => {
 ───────────────────────────────────────── */
 app.get("/health", (_req, res) => res.json({ status: "ok", ts: Date.now() }));
 
-/* ─────────────────────────────────────────
-   404 FALLBACK
-───────────────────────────────────────── */
 app.use(
   "/venues",
   venuesModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole, logAudit })
