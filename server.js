@@ -639,6 +639,8 @@ app.patch("/users/me", requireCustomerAuth, async (req, res) => {
 });
 
 
+/* ─────────────────────────────────────────
+   Customer-scoped booking routes: reservations, celebrations,
    preBookings, cateringOrders, eventBookings.
    Registered BEFORE the generic ARRAY_COLLECTIONS loop (admin-only)
    so these take priority for a customer session. Mirrors the exact
@@ -1428,9 +1430,9 @@ io.on("connection", (socket) => {
   });
 });
 
-/* ──────────────────────────────────────────────────
+/* ─────────────────────────────────────────
    HEALTH CHECK
-────────────────────────────────────────────────── */
+───────────────────────────────────────── */
 app.get("/health", (_req, res) => res.json({ status: "ok", ts: Date.now() }));
 
 app.use(
