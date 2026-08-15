@@ -799,6 +799,54 @@ app.post("/orders", async (req, res) => {
       }
     }
 
+    // Deduct consumed ingredient stock server-side, using the ingredient
+    // quantities already embedded on each order item (item.ingredients,
+    // each { name, quantity } in grams). This used to run client-side —
+    // the customer's browser would fetch the ENTIRE ingredients
+    // collection (including every other ingredient's current stock
+    // level) and push authenticated writes back to it directly, which
+    // is both an unnecessary data exposure and, now that admin routes
+    // are properly session-gated, simply can't work from a customer
+    // session at all. Doing it here means the customer only ever sends
+    // what they ordered; the server computes and applies the deduction
+    // with the same access it already has for order creation, and a
+    // failure here doesn't roll back or block the order itself — stock
+    // accuracy issues (e.g. a race between two simultaneous orders) are
+    // worth fixing but shouldn't ever prevent someone's food order from
+    // going through.
+    try {
+      const usedKgByName = new Map();
+      for (const item of Array.isArray(result.items) ? result.items : []) {
+        const qty = Number(item.quantity) || 1;
+        for (const ing of Array.isArray(item.ingredients) ? item.ingredients : []) {
+          if (!ing?.name) continue;
+          const usedKg = ((Number(ing.quantity) || 0) * qty) / 1000;
+          if (usedKg <= 0) continue;
+          usedKgByName.set(ing.name, (usedKgByName.get(ing.name) || 0) + usedKg);
+        }
+      }
+
+      if (usedKgByName.size) {
+        const IngredientModel = getModel("ingredients");
+        await Promise.all(
+          Array.from(usedKgByName.entries()).map(([name, usedKg]) =>
+            // $inc with a negative value is atomic — two orders deducting
+            // the same ingredient concurrently can't clobber each other's
+            // write the way a client-side read-then-write round trip
+            // could. Floors at 0 in a follow-up clamp rather than letting
+            // stock go negative under high concurrency.
+            IngredientModel.updateOne({ name }, { $inc: { stockRemaining: -usedKg } })
+          )
+        );
+        await IngredientModel.updateMany(
+          { name: { $in: Array.from(usedKgByName.keys()) }, stockRemaining: { $lt: 0 } },
+          { $set: { stockRemaining: 0 } }
+        );
+      }
+    } catch (stockErr) {
+      console.warn("Could not deduct ingredient stock for order", result.id, stockErr.message);
+    }
+
     emitChange("orders", "created", result);
     res.status(201).json(result);
   } catch (err) {
