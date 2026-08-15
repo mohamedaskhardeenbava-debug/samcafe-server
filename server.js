@@ -429,6 +429,30 @@ app.post("/auth/login", async (req, res) => {
 // panel (Welcome.js) actually authenticates customers (no password).
 // Issues an httpOnly cookie session instead of the frontend trusting a
 // raw userId in localStorage.
+/* ─────────────────────────────────────────
+   GET /auth/mobile-exists?mobile=... — used only to power the
+   mobile-number autocomplete on the login screen, before any session
+   exists. Deliberately returns nothing but a boolean (never actual
+   user records) — the old approach called the admin-only GET /users
+   and filtered every customer's mobile number client-side, which both
+   (a) 401s now that admin routes are properly session-gated, and
+   (b) would have exposed every customer's phone number to anyone on
+   the login screen even if it had "worked". This route can't be used
+   to enumerate real numbers beyond exact/prefix matches the caller
+   already typed, and returns only { exists: boolean }.
+───────────────────────────────────────── */
+app.get("/auth/mobile-exists", async (req, res) => {
+  try {
+    const mobile = String(req.query.mobile || "").trim();
+    if (!mobile) return res.json({ exists: false });
+    const match = await getModel("users").findOne({ mobile }).lean();
+    res.json({ exists: !!match });
+  } catch (err) {
+    console.error("GET /auth/mobile-exists", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.post("/auth/session-login", async (req, res) => {
   try {
     const { mobile } = req.body;
