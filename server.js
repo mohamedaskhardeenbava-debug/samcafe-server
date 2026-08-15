@@ -581,6 +581,186 @@ app.patch("/users/me/favourites", requireCustomerAuth, async (req, res) => {
 });
 
 /* ─────────────────────────────────────────
+   GET /users/me — the logged-in customer's own profile. Registered
+   BEFORE the generic /users/:id loop (admin-only) so this takes
+   priority for a customer's own session. Used by every booking form
+   to pre-fill name/mobile/email (bookingCrud.resolveUser()) instead
+   of the admin-gated GET /users/:id, which always 401s for a
+   customer session.
+───────────────────────────────────────── */
+app.get("/users/me", requireCustomerAuth, async (req, res) => {
+  try {
+    const user = await getModel("users").findOne({ id: req.customerUserId }).lean();
+    if (!user) return res.status(404).json({ error: "Account not found" });
+    const result = stripMeta(user);
+    delete result.password;
+    res.json(result);
+  } catch (err) {
+    console.error("GET /users/me", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────
+   PATCH /users/me — update the logged-in customer's own profile
+   fields (name, mobile, email, combo favourites, etc.). Deliberately
+   allowlists which fields can be self-updated rather than accepting
+   a raw full-document overwrite — the users collection is shared with
+   staff/admin accounts and carries a `role` field, so blindly trusting
+   client-supplied fields here would let a customer escalate their own
+   account. Add to ALLOWED_SELF_UPDATE_FIELDS as new self-editable
+   profile fields are introduced.
+───────────────────────────────────────── */
+const ALLOWED_SELF_UPDATE_FIELDS = ["name", "mobile", "email", "combo", "address"];
+app.patch("/users/me", requireCustomerAuth, async (req, res) => {
+  try {
+    const update = {};
+    for (const field of ALLOWED_SELF_UPDATE_FIELDS) {
+      if (Object.prototype.hasOwnProperty.call(req.body || {}, field)) {
+        update[field] = req.body[field];
+      }
+    }
+    if (!Object.keys(update).length) {
+      return res.status(400).json({ error: "No updatable fields provided" });
+    }
+
+    const updated = await getModel("users")
+      .findOneAndUpdate({ id: req.customerUserId }, update, { returnDocument: "after" })
+      .lean();
+    if (!updated) return res.status(404).json({ error: "Account not found" });
+
+    const result = stripMeta(updated);
+    delete result.password;
+    res.json(result);
+  } catch (err) {
+    console.error("PATCH /users/me", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+   preBookings, cateringOrders, eventBookings.
+   Registered BEFORE the generic ARRAY_COLLECTIONS loop (admin-only)
+   so these take priority for a customer session. Mirrors the exact
+   shape the admin panel and eventBookingCrud.js (User Panel) already
+   expect — same collections, same id/status conventions — the only
+   difference is the auth guard and that reads/updates/deletes are
+   scoped to the caller's own userId so one customer can never see or
+   modify another's bookings.
+───────────────────────────────────────── */
+const CUSTOMER_BOOKING_COLLECTIONS = [
+  "reservations",
+  "celebrations",
+  "preBookings",
+  "cateringOrders",
+  "eventBookings",
+];
+
+CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
+  const base = `/${name}`;
+
+  // POST /reservations (etc.) — create a booking owned by the caller.
+  // Forces userId to the authenticated session regardless of what the
+  // client sent, so a customer can never create a booking under
+  // someone else's account.
+  app.post(base, requireCustomerAuth, async (req, res) => {
+    try {
+      const Model = getModel(name);
+      const doc = { ...req.body, userId: req.customerUserId };
+      const created = await Model.create(doc);
+      res.status(201).json(stripMeta(created.toObject ? created.toObject() : created));
+    } catch (err) {
+      console.error(`POST ${base} (customer)`, err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /reservations (etc.) — the caller's own bookings only.
+  app.get(base, requireCustomerAuth, async (req, res) => {
+    try {
+      const docs = await getModel(name)
+        .find({ userId: req.customerUserId })
+        .sort({ createdAt: -1 })
+        .lean();
+      res.json(docs.map(stripMeta));
+    } catch (err) {
+      console.error(`GET ${base} (customer)`, err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /reservations/:id (etc.) — single booking, only if it's the
+  // caller's own (404s rather than 403s if it belongs to someone
+  // else, so as not to leak whether the id exists at all).
+  app.get(`${base}/:id`, requireCustomerAuth, async (req, res) => {
+    try {
+      const doc = await getModel(name)
+        .findOne({ id: req.params.id, userId: req.customerUserId })
+        .lean();
+      if (!doc) return res.status(404).json({ error: "Not found" });
+      res.json(stripMeta(doc));
+    } catch (err) {
+      console.error(`GET ${base}/:id (customer)`, err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // PUT /reservations/:id (etc.) — update, own bookings only. Used for
+  // cancellation (status → "cancelled") via bookingCrud.cancel().
+  // userId is re-forced to the caller's own id on every update so a
+  // crafted payload can never reassign a booking to another account.
+  app.put(`${base}/:id`, requireCustomerAuth, async (req, res) => {
+    try {
+      const Model = getModel(name);
+      const update = { ...req.body, userId: req.customerUserId };
+      const updated = await Model.findOneAndUpdate(
+        { id: req.params.id, userId: req.customerUserId },
+        update,
+        { returnDocument: "after" }
+      ).lean();
+      if (!updated) return res.status(404).json({ error: "Not found" });
+      res.json(stripMeta(updated));
+    } catch (err) {
+      console.error(`PUT ${base}/:id (customer)`, err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // DELETE /reservations/:id (etc.) — own bookings only.
+  app.delete(`${base}/:id`, requireCustomerAuth, async (req, res) => {
+    try {
+      const result = await getModel(name).deleteOne({
+        id: req.params.id,
+        userId: req.customerUserId,
+      });
+      if (!result.deletedCount) return res.status(404).json({ error: "Not found" });
+      res.json({ success: true });
+    } catch (err) {
+      console.error(`DELETE ${base}/:id (customer)`, err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+});
+
+/* ─────────────────────────────────────────
+   GET /tablePreferences — read-only reference data (dining
+   preference options shown in booking forms, e.g. "Window seat",
+   "Quiet area"). Not owned by any one user, so no userId scoping —
+   any authenticated customer can read the full list. Registered
+   BEFORE the generic admin-only loop so a customer session isn't
+   rejected trying to populate a booking form's preference dropdown.
+───────────────────────────────────────── */
+app.get("/tablePreferences", requireCustomerAuth, async (req, res) => {
+  try {
+    const docs = await getModel("tablePreferences").find({}).lean();
+    res.json(docs.map(stripMeta));
+  } catch (err) {
+    console.error("GET /tablePreferences (customer)", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────
    ORDERS — dedicated create route
    Registered BEFORE the generic loop so it
    takes priority for POST /orders.
