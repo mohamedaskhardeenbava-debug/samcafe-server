@@ -663,6 +663,57 @@ app.patch("/users/me", requireCustomerAuth, async (req, res) => {
 });
 
 
+/**
+ * requireCustomerAuthOrNext — same cookie/session check as
+ * requireCustomerAuth, but used only on the booking routes below,
+ * which are registered at the same paths (/reservations, etc.) as the
+ * admin-scoped ARRAY_COLLECTIONS routes further down this file.
+ *
+ * requireCustomerAuth hard-401s when there's no valid samcafe_uid
+ * cookie — correct for customer-only routes like /auth/me, but wrong
+ * here: Express matches routes in registration order, so if this
+ * block 401'd on a missing/expired customer cookie, an admin session
+ * (which only ever carries samcafe_sid, never samcafe_uid) would
+ * never reach the real admin-scoped handler for these same paths
+ * registered later — every admin request to /reservations,
+ * /celebrations, /preBookings, /cateringOrders, and /eventBookings
+ * would 401 outright, regardless of how valid the admin's own session
+ * was. (This was live in production: any leftover/expired samcafe_uid
+ * cookie from previously using the customer-facing panel in the same
+ * browser was enough to make GET /reservations etc. always return
+ * "Session expired" for an admin, no matter which role logged in.)
+ *
+ * Falling through via next() when there's no valid customer session
+ * lets the request continue on to the admin-scoped handler further
+ * down instead of dead-ending here. A genuine customer session is
+ * still required (and still enforced) for the customer-scoped
+ * behavior itself — this only changes what happens when that specific
+ * session is absent.
+ */
+async function requireCustomerAuthOrNext(req, res, next) {
+  try {
+    const sessionId = req.cookies ? req.cookies[CUSTOMER_SESSION_COOKIE] : null;
+    if (!sessionId) return next("route");
+
+    const session = await CustomerSession.findOne({ sessionId }).lean();
+    if (!session || session.expiresAt < new Date()) {
+      return next("route");
+    }
+
+    CustomerSession.updateOne(
+      { sessionId },
+      { $set: { lastActive: new Date(), expiresAt: new Date(Date.now() + CUSTOMER_SESSION_TTL_MS) } }
+    ).catch(() => { });
+
+    req.customerSessionId = sessionId;
+    req.customerUserId = session.userId;
+    next();
+  } catch (err) {
+    console.error("requireCustomerAuthOrNext error:", err.message);
+    res.status(500).json({ error: "Auth check failed" });
+  }
+}
+
 /* ─────────────────────────────────────────
    Customer-scoped booking routes: reservations, celebrations,
    preBookings, cateringOrders, eventBookings.
@@ -673,6 +724,13 @@ app.patch("/users/me", requireCustomerAuth, async (req, res) => {
    difference is the auth guard and that reads/updates/deletes are
    scoped to the caller's own userId so one customer can never see or
    modify another's bookings.
+
+   Uses requireCustomerAuthOrNext (not requireCustomerAuth): when
+   there's no valid customer session, the request falls through to the
+   admin-scoped ARRAY_COLLECTIONS handler for the same path instead of
+   401ing outright — see that function's comment for why the plain
+   401-on-missing-cookie version broke every admin request to these
+   exact paths.
 ───────────────────────────────────────── */
 const CUSTOMER_BOOKING_COLLECTIONS = [
   "reservations",
@@ -689,7 +747,7 @@ CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
   // Forces userId to the authenticated session regardless of what the
   // client sent, so a customer can never create a booking under
   // someone else's account.
-  app.post(base, requireCustomerAuth, async (req, res) => {
+  app.post(base, requireCustomerAuthOrNext, async (req, res) => {
     try {
       const Model = getModel(name);
       const doc = { ...req.body, userId: req.customerUserId };
@@ -702,7 +760,7 @@ CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
   });
 
   // GET /reservations (etc.) — the caller's own bookings only.
-  app.get(base, requireCustomerAuth, async (req, res) => {
+  app.get(base, requireCustomerAuthOrNext, async (req, res) => {
     try {
       const docs = await getModel(name)
         .find({ userId: req.customerUserId })
@@ -718,7 +776,7 @@ CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
   // GET /reservations/:id (etc.) — single booking, only if it's the
   // caller's own (404s rather than 403s if it belongs to someone
   // else, so as not to leak whether the id exists at all).
-  app.get(`${base}/:id`, requireCustomerAuth, async (req, res) => {
+  app.get(`${base}/:id`, requireCustomerAuthOrNext, async (req, res) => {
     try {
       const doc = await getModel(name)
         .findOne({ id: req.params.id, userId: req.customerUserId })
@@ -735,7 +793,7 @@ CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
   // cancellation (status → "cancelled") via bookingCrud.cancel().
   // userId is re-forced to the caller's own id on every update so a
   // crafted payload can never reassign a booking to another account.
-  app.put(`${base}/:id`, requireCustomerAuth, async (req, res) => {
+  app.put(`${base}/:id`, requireCustomerAuthOrNext, async (req, res) => {
     try {
       const Model = getModel(name);
       const update = { ...req.body, userId: req.customerUserId };
@@ -753,7 +811,7 @@ CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
   });
 
   // DELETE /reservations/:id (etc.) — own bookings only.
-  app.delete(`${base}/:id`, requireCustomerAuth, async (req, res) => {
+  app.delete(`${base}/:id`, requireCustomerAuthOrNext, async (req, res) => {
     try {
       const result = await getModel(name).deleteOne({
         id: req.params.id,
