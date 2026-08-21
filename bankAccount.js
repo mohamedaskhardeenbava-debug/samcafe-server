@@ -80,7 +80,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
     try {
       const doc = await BankAccount.findOne({ id: SINGLETON_ID }).lean();
       const result = doc ? safeBankAccount(doc, { reveal: true }) : {};
-      await logAudit(req, { action: "read", resource: "bankAccount", targetId: SINGLETON_ID });
+      logAudit(req, { action: "read", resource: "bankAccount", targetId: SINGLETON_ID });
       res.json(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -113,7 +113,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       ).lean();
 
       const result = safeBankAccount(doc);
-      await logAudit(req, {
+      logAudit(req, {
         action: "update",
         resource: "bankAccount",
         targetId: SINGLETON_ID,

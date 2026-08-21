@@ -31,6 +31,7 @@ const documentSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     department: { type: String, required: true, enum: DEPARTMENTS },
     date: { type: String, required: true }, // issue/filed date, "YYYY-MM-DD"
+    toDate: { type: String, default: "" }, // expiry/valid-until date, "YYYY-MM-DD"
     reminderDate: { type: String, default: "" }, // "YYYY-MM-DD", optional
     fileName: { type: String, default: "" },
     fileType: { type: String, default: "" },
@@ -82,7 +83,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
   // POST /documents
   router.post("/", requireAuth, requireRole("Super Admin"), async (req, res) => {
     try {
-      const { name, department, date, reminderDate, fileName, fileType, fileData, venueId } = req.body;
+      const { name, department, date, toDate, reminderDate, fileName, fileType, fileData, venueId } = req.body;
       if (!name || !department || !date) {
         return res.status(400).json({ error: "name, department, and date are required" });
       }
@@ -94,6 +95,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
         name,
         department,
         date,
+        toDate: toDate || "",
         reminderDate: reminderDate || "",
         fileName: fileName || "",
         fileType: fileType || "",
@@ -102,7 +104,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
         createdBy: req.admin.id,
       });
       const result = safeDocument(doc);
-      await logAudit(req, { action: "create", resource: "documents", targetId: result.id, after: result });
+      logAudit(req, { action: "create", resource: "documents", targetId: result.id, after: result });
       res.status(201).json(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -115,7 +117,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       const before = await Document.findOne({ id: req.params.id }).lean();
       if (!before) return res.status(404).json({ error: "Document not found" });
 
-      const { name, department, date, reminderDate, fileName, fileType, fileData, venueId } = req.body;
+      const { name, department, date, toDate, reminderDate, fileName, fileType, fileData, venueId } = req.body;
       if (department && !DEPARTMENTS.includes(department)) {
         return res.status(400).json({ error: `department must be one of: ${DEPARTMENTS.join(", ")}` });
       }
@@ -123,6 +125,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       if (name !== undefined) update.name = name;
       if (department !== undefined) update.department = department;
       if (date !== undefined) update.date = date;
+      if (toDate !== undefined) update.toDate = toDate;
       if (reminderDate !== undefined) update.reminderDate = reminderDate;
       if (fileName !== undefined) update.fileName = fileName;
       if (fileType !== undefined) update.fileType = fileType;
@@ -135,7 +138,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
         { returnDocument: "after" }
       ).lean();
       const result = safeDocument(doc);
-      await logAudit(req, {
+      logAudit(req, {
         action: "update",
         resource: "documents",
         targetId: result.id,
@@ -153,7 +156,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
     try {
       const before = await Document.findOneAndDelete({ id: req.params.id }).lean();
       if (!before) return res.status(404).json({ error: "Document not found" });
-      await logAudit(req, { action: "delete", resource: "documents", targetId: req.params.id, before: safeDocument(before) });
+      logAudit(req, { action: "delete", resource: "documents", targetId: req.params.id, before: safeDocument(before) });
       res.json({ success: true });
     } catch (err) {
       res.status(500).json({ error: err.message });

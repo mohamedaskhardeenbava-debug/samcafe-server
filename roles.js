@@ -142,7 +142,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
         createdBy: req.admin.id,
       });
       const result = safeRole(entry);
-      await logAudit(req, { action: "create", resource: "roles", targetId: result.id, after: result });
+      logAudit(req, { action: "create", resource: "roles", targetId: result.id, after: result });
       res.status(201).json(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -159,7 +159,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       if (responsibilities !== undefined) update.responsibilities = responsibilities;
       const entry = await RoleEntry.findOneAndUpdate({ id: req.params.id }, { $set: update }, { returnDocument: "after" }).lean();
       const result = safeRole(entry);
-      await logAudit(req, { action: "update", resource: "roles", targetId: result.id, before: safeRole(before), after: result });
+      logAudit(req, { action: "update", resource: "roles", targetId: result.id, before: safeRole(before), after: result });
       res.json(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -170,7 +170,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
     try {
       const before = await RoleEntry.findOneAndDelete({ id: req.params.id }).lean();
       if (!before) return res.status(404).json({ error: "Role entry not found" });
-      await logAudit(req, { action: "delete", resource: "roles", targetId: req.params.id, before: safeRole(before) });
+      logAudit(req, { action: "delete", resource: "roles", targetId: req.params.id, before: safeRole(before) });
       res.json({ success: true });
     } catch (err) {
       res.status(500).json({ error: err.message });

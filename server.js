@@ -1066,7 +1066,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
         const result = stripMeta(doc.toObject());
         emitChange(name, "created", result);
         notifyNewBooking(name, result);
-        await logAudit(req, { action: "create", resource: name, targetId: result.id, after: result });
+        logAudit(req, { action: "create", resource: name, targetId: result.id, after: result });
         res.status(201).json(result);
       } catch (err) {
         console.error(`POST /${name}`, err.message);
@@ -1092,7 +1092,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
         .lean();
       const result = stripMeta(doc);
       emitChange(name, "updated", result);
-      await logAudit(req, { action: "update", resource: name, targetId: result.id, before, after: result });
+      logAudit(req, { action: "update", resource: name, targetId: result.id, before, after: result });
       res.json(result);
     } catch (err) {
       console.error(`PUT /${name}/:id`, err.message);
@@ -1114,7 +1114,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
         .lean();
       const result = stripMeta(doc);
       emitChange(name, "updated", result);
-      await logAudit(req, { action: "update", resource: name, targetId: result.id, before, after: result });
+      logAudit(req, { action: "update", resource: name, targetId: result.id, before, after: result });
       res.json(result);
     } catch (err) {
       console.error(`PATCH /${name}/:id`, err.message);
@@ -1130,7 +1130,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
       if (!doc) return res.status(404).json({ error: "Not found" });
       const result = stripMeta(doc);
       emitChange(name, "deleted", result);
-      await logAudit(req, { action: "delete", resource: name, targetId: result.id, before: result });
+      logAudit(req, { action: "delete", resource: name, targetId: result.id, before: result });
 
       // Every login account must be linked to a real staff record — if
       // the staff record itself is deleted, its login account (if any)
@@ -1142,7 +1142,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
         const linkedAccount = await Admin.findOneAndDelete({ staffId: result.id }).lean();
         if (linkedAccount) {
           await Session.deleteMany({ adminId: linkedAccount.id });
-          await logAudit(req, { action: "delete", resource: "admins", targetId: linkedAccount.id, before: linkedAccount });
+          logAudit(req, { action: "delete", resource: "admins", targetId: linkedAccount.id, before: linkedAccount });
         }
       }
 
@@ -1219,7 +1219,7 @@ VENUE_SINGLETONS.forEach((name) => {
         .lean();
       const { _id, __v, id, ...result } = doc;
       emitChange(name, "updated", result);
-      await logAudit(req, { action: "update", resource: name, targetId: venueId, before, after: result });
+      logAudit(req, { action: "update", resource: name, targetId: venueId, before, after: result });
       res.json(result);
     } catch (err) {
       console.error(`PUT /${name}`, err.message, err.stack);
@@ -1242,7 +1242,7 @@ VENUE_SINGLETONS.forEach((name) => {
         .lean();
       const { _id, __v, id, ...result } = doc;
       emitChange(name, "updated", result);
-      await logAudit(req, { action: "update", resource: name, targetId: venueId, before, after: result });
+      logAudit(req, { action: "update", resource: name, targetId: venueId, before, after: result });
       res.json(result);
     } catch (err) {
       console.error(`PATCH /${name}`, err.message, err.stack);
@@ -1378,7 +1378,7 @@ GLOBAL_SINGLETONS.forEach((name) => {
         .lean();
       const { _id, __v, id, ...result } = doc;
       emitChange(name, "updated", result);
-      await logAudit(req, { action: "update", resource: name, targetId: "global", before, after: result });
+      logAudit(req, { action: "update", resource: name, targetId: "global", before, after: result });
       res.json(result);
     } catch (err) {
       console.error(`PUT /${name}`, err.message);
@@ -1394,7 +1394,7 @@ GLOBAL_SINGLETONS.forEach((name) => {
         .lean();
       const { _id, __v, id, ...result } = doc;
       emitChange(name, "updated", result);
-      await logAudit(req, { action: "update", resource: name, targetId: "global", before, after: result });
+      logAudit(req, { action: "update", resource: name, targetId: "global", before, after: result });
       res.json(result);
     } catch (err) {
       console.error(`PATCH /${name}`, err.message);

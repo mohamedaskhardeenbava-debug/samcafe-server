@@ -103,7 +103,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
         createdBy: req.admin.id,
       });
       const result = safeVenue(venue);
-      await logAudit(req, { action: "create", resource: "venues", targetId: result.id, after: result });
+      logAudit(req, { action: "create", resource: "venues", targetId: result.id, after: result });
       res.status(201).json(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -125,7 +125,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       await target.save();
 
       const result = safeVenue(target);
-      await logAudit(req, { action: "update", resource: "venues", targetId: result.id, after: { isMainBranch: true } });
+      logAudit(req, { action: "update", resource: "venues", targetId: result.id, after: { isMainBranch: true } });
       const venues = await Venue.find().sort({ name: 1 }).lean();
       res.json(venues.map(safeVenue));
     } catch (err) {
@@ -152,7 +152,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
         { returnDocument: "after" }
       ).lean();
       const result = safeVenue(venue);
-      await logAudit(req, {
+      logAudit(req, {
         action: "update",
         resource: "venues",
         targetId: result.id,
@@ -178,7 +178,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       }
       const before = await Venue.findOneAndDelete({ id: req.params.id }).lean();
       if (!before) return res.status(404).json({ error: "Venue not found" });
-      await logAudit(req, { action: "delete", resource: "venues", targetId: req.params.id, before: safeVenue(before) });
+      logAudit(req, { action: "delete", resource: "venues", targetId: req.params.id, before: safeVenue(before) });
       res.json({ success: true });
     } catch (err) {
       res.status(500).json({ error: err.message });

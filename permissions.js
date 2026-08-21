@@ -354,7 +354,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       }
       await Permission.bulkWrite(ops);
       invalidatePermCache();
-      await logAudit(req, { action: "update", resource: "permissions", targetId: "matrix", after: { rowCount: rows.length } });
+      logAudit(req, { action: "update", resource: "permissions", targetId: "matrix", after: { rowCount: rows.length } });
       const updated = await Permission.find().sort({ module: 1, roleTitle: 1 }).lean();
       res.json({ rows: updated, modules: MODULES, roleTitles: ALL_ROLE_TITLES });
     } catch (err) {
@@ -368,7 +368,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       await Permission.deleteMany({});
       await Permission.insertMany(defaultRows());
       invalidatePermCache();
-      await logAudit(req, { action: "update", resource: "permissions", targetId: "matrix", after: { reset: true } });
+      logAudit(req, { action: "update", resource: "permissions", targetId: "matrix", after: { reset: true } });
       const rows = await Permission.find().sort({ module: 1, roleTitle: 1 }).lean();
       res.json({ rows, modules: MODULES, roleTitles: ALL_ROLE_TITLES });
     } catch (err) {
