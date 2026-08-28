@@ -28,6 +28,7 @@ const auditLogModule = require("./auditLog");
 const documentsModule = require("./documents");
 const paymentsModule = require("./payments");
 const bankAccountModule = require("./bankAccount");
+const chatModule = require("./chat");
 const { logAudit } = auditLogModule;
 const { hasPermission } = permissionsModule;
 
@@ -286,6 +287,17 @@ function stripMeta(doc) {
   delete out._id;
   delete out.__v;
   return out;
+}
+
+/** Emit an event to a single admin's own socket room (see chat:register above). */
+function emitToAdmin(adminId, event, payload) {
+  io.to(`admin:${adminId}`).emit(event, payload);
+}
+
+/** Whether an admin currently has at least one connected socket (see chat:register). */
+function isAdminOnline(adminId) {
+  const room = io.sockets.adapter.rooms.get(`admin:${adminId}`);
+  return !!room && room.size > 0;
 }
 
 /** Emit a data-change event with a unique eventId to prevent double-firing. */
@@ -1452,6 +1464,24 @@ io.on("connection", (socket) => {
   // Sync current bell state to the newly connected client
   socket.emit("bell-sync", activeBells);
 
+  // Staff chat: the client announces its own admin id right after
+  // connecting so we can target it directly (emitToAdmin below) without
+  // every chat event being broadcast to every connected socket. Also
+  // flips any messages waiting for this admin from "sent" to
+  // "delivered" (single → double tick) and tells each sender.
+  socket.on("chat:register", async (payload) => {
+    const adminId = payload && payload.adminId;
+    if (!adminId || typeof adminId !== "string") return;
+    socket.data.chatAdminId = adminId;
+    socket.join(`admin:${adminId}`);
+    if (typeof chatModule.markDelivered === "function") {
+      const bySender = await chatModule.markDelivered(adminId);
+      bySender.forEach((messageIds, senderId) => {
+        emitToAdmin(senderId, "chat:delivered", { toId: adminId, messageIds });
+      });
+    }
+  });
+
   // Tell the newly connected client current printer status right away
   socket.emit("printer:status", { online: isPrinterOnline() });
 
@@ -1616,6 +1646,10 @@ app.use(
   "/bank-account",
   bankAccountModule.buildRouter({ requireAuth: requireAdminAuth, requireRole: requireAdminRole, logAudit })
 );
+app.use(
+  "/chat",
+  chatModule.buildRouter({ requireAuth: requireAdminAuth, logAudit, emitToAdmin, isAdminOnline })
+);
 
 app.use((_req, res) => res.status(404).json({ error: "Route not found" }));
 
@@ -1771,6 +1805,7 @@ mongoose
     // Re-check every 6 hours so a long-running process (no restart)
     // still resets promptly after midnight on the 1st of the month.
     setInterval(resetMonthlySalaryFieldsIfNeeded, 6 * 60 * 60 * 1000);
+    chatModule.scheduleMidnightChatPurge(() => io.emit("chat:purged", {}));
     httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on port ${PORT}`);
     });
