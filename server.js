@@ -261,6 +261,7 @@ const ARRAY_COLLECTIONS = [
   "combo",
   "callHistory",
   "tablePreferences",
+  "subscriptions",
 ];
 
 // Plain objects in db.json — stored as one doc with id="singleton"
@@ -319,12 +320,13 @@ const BOOKING_META = {
   celebrations: { label: "New celebration booking", route: "/celebrations" },
   cateringOrders: { label: "New catering order", route: "/catering" },
   preBookings: { label: "New pre-booking", route: "/pre-bookings" },
+  subscriptions: { label: "New subscription", route: "/subscriptions" },
 };
 
 function notifyNewBooking(resource, body) {
   const meta = BOOKING_META[resource];
   if (!meta) return;
-  const name = body.name || body.userName || "";
+  const name = body.name || body.userName || body.customerName || "";
   io.emit("new-booking", {
     resource,
     message: name ? `${meta.label} — ${name}` : meta.label,
@@ -728,7 +730,7 @@ async function requireCustomerAuthOrNext(req, res, next) {
 
 /* ─────────────────────────────────────────
    Customer-scoped booking routes: reservations, celebrations,
-   preBookings, cateringOrders, eventBookings.
+   preBookings, cateringOrders, eventBookings, subscriptions.
    Registered BEFORE the generic ARRAY_COLLECTIONS loop (admin-only)
    so these take priority for a customer session. Mirrors the exact
    shape the admin panel and eventBookingCrud.js (User Panel) already
@@ -750,6 +752,7 @@ const CUSTOMER_BOOKING_COLLECTIONS = [
   "preBookings",
   "cateringOrders",
   "eventBookings",
+  "subscriptions",
 ];
 
 CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
@@ -764,7 +767,10 @@ CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
       const Model = getModel(name);
       const doc = { ...req.body, userId: req.customerUserId };
       const created = await Model.create(doc);
-      res.status(201).json(stripMeta(created.toObject ? created.toObject() : created));
+      const result = stripMeta(created.toObject ? created.toObject() : created);
+      emitChange(name, "created", result);
+      notifyNewBooking(name, result);
+      res.status(201).json(result);
     } catch (err) {
       console.error(`POST ${base} (customer)`, err.message);
       res.status(500).json({ error: err.message });
@@ -815,7 +821,9 @@ CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
         { returnDocument: "after" }
       ).lean();
       if (!updated) return res.status(404).json({ error: "Not found" });
-      res.json(stripMeta(updated));
+      const result = stripMeta(updated);
+      emitChange(name, "updated", result);
+      res.json(result);
     } catch (err) {
       console.error(`PUT ${base}/:id (customer)`, err.message);
       res.status(500).json({ error: err.message });
@@ -830,6 +838,7 @@ CUSTOMER_BOOKING_COLLECTIONS.forEach((name) => {
         userId: req.customerUserId,
       });
       if (!result.deletedCount) return res.status(404).json({ error: "Not found" });
+      emitChange(name, "deleted", req.params.id);
       res.json({ success: true });
     } catch (err) {
       console.error(`DELETE ${base}/:id (customer)`, err.message);
@@ -1805,7 +1814,7 @@ mongoose
     // Re-check every 6 hours so a long-running process (no restart)
     // still resets promptly after midnight on the 1st of the month.
     setInterval(resetMonthlySalaryFieldsIfNeeded, 6 * 60 * 60 * 1000);
-    chatModule.scheduleMidnightChatPurge(() => io.emit("chat:purged", {}));
+    chatModule.scheduleWeeklyChatPurge(() => io.emit("chat:purged", {}));
     httpServer.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on port ${PORT}`);
     });

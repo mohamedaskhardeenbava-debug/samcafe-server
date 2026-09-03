@@ -119,65 +119,68 @@ async function markDelivered(adminId) {
 }
 
 /**
- * Called from server.js on boot and then re-armed every 24h. Deletes
- * every chat message whose createdAt is before today's local midnight,
- * so a day's conversation history never survives past 12:00 AM the
- * next day.
+ * Deletes every chat message currently in the collection. Called once
+ * a week (Sunday 12:00 AM local time) so staff chat history never
+ * survives past the start of the next week.
  */
-async function purgeMessagesBeforeToday() {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const result = await ChatMessage.deleteMany({ createdAt: { $lt: startOfToday } });
+async function purgeAllMessages() {
+  const result = await ChatMessage.deleteMany({});
   if (result.deletedCount > 0) {
-    console.log(`Staff chat: purged ${result.deletedCount} message(s) from before today`);
+    console.log(`Staff chat: weekly purge removed ${result.deletedCount} message(s)`);
   }
   return result.deletedCount;
 }
 
 /**
- * Schedules purgeMessagesBeforeToday to run once right at the next
- * local midnight, then every 24h after that. Call once on server boot.
- * `onPurged` (optional) is called with the deleted count after each
- * run, so the caller can notify any connected clients.
+ * Schedules purgeAllMessages to run once right at the next Sunday
+ * 12:00 AM local time, then every 7 days after that. Call once on
+ * server boot. `onPurged` (optional) is called with the deleted count
+ * after each run, so the caller can notify any connected clients.
  */
-function scheduleMidnightChatPurge(onPurged) {
+function scheduleWeeklyChatPurge(onPurged) {
   const runOnce = async () => {
     try {
-      const deletedCount = await purgeMessagesBeforeToday();
+      const deletedCount = await purgeAllMessages();
       if (deletedCount > 0 && typeof onPurged === "function") onPurged(deletedCount);
     } catch (err) {
-      console.error("Staff chat midnight purge failed:", err.message);
+      console.error("Staff chat weekly purge failed:", err.message);
     }
   };
 
   const runAndReschedule = async () => {
     await runOnce();
-    setInterval(runOnce, 24 * 60 * 60 * 1000);
+    setInterval(runOnce, 7 * 24 * 60 * 60 * 1000);
   };
 
   const now = new Date();
-  const nextMidnight = new Date(now);
-  nextMidnight.setHours(24, 0, 0, 0); // next occurrence of 12:00 AM
-  const msUntilMidnight = nextMidnight.getTime() - now.getTime();
-  setTimeout(runAndReschedule, msUntilMidnight);
+  const nextSunday = new Date(now);
+  // getDay(): 0 = Sunday. Days remaining until the next Sunday
+  // (7 if today already is Sunday but midnight has passed).
+  const daysUntilSunday = (7 - now.getDay()) % 7 || 7;
+  nextSunday.setDate(now.getDate() + daysUntilSunday);
+  nextSunday.setHours(0, 0, 0, 0);
+  const msUntilSunday = nextSunday.getTime() - now.getTime();
+  setTimeout(runAndReschedule, msUntilSunday);
 }
 
 /* ─────────────────────────────────────────
    ROUTES — Mounted at /chat. Any authenticated admin.
 ───────────────────────────────────────── */
 function buildRouter({ requireAuth, logAudit, emitToAdmin, isAdminOnline }) {
-  // GET /chat/staff?venueId=... — the left-sidebar list. Regular admins
-  // always see their own venue; Super Admin sees whichever venue is
-  // selected in the topbar switcher (falls back to every admin if none
-  // given, e.g. before the switcher has loaded).
+  // GET /chat/staff?venueId=... — the left-sidebar list. Everyone can
+  // message anybody regardless of venue (only the Super Admin ->
+  // reply restriction is venue-agnostic and enforced on send below),
+  // so this is unfiltered by venue for regular admins. Super Admin
+  // still narrows to whichever venue is selected in the topbar
+  // switcher (falls back to every admin if none given, e.g. before
+  // the switcher has loaded) since Super Admin's list doubles as a
+  // per-venue staff browser.
   router.get("/staff", requireAuth, async (req, res) => {
     try {
       const Admin = mongoose.model("Admin");
       const filter = { id: { $ne: req.admin.id }, status: "active" };
-      if (req.admin.roleGroup === "Super Admin") {
-        if (req.query.venueId) filter.venueId = req.query.venueId;
-      } else {
-        filter.venueId = req.admin.venueId;
+      if (req.admin.roleGroup === "Super Admin" && req.query.venueId) {
+        filter.venueId = req.query.venueId;
       }
       const admins = await Admin.find(filter).select("id name roleTitle roleGroup venueId photo email phone").lean();
 
@@ -219,10 +222,10 @@ function buildRouter({ requireAuth, logAudit, emitToAdmin, isAdminOnline }) {
           phone: a.phone || "",
           lastMessage: last
             ? {
-                text: last.lastType === "text" ? last.lastText : `Sent ${last.lastType === "file" ? "a file" : `a${last.lastType === "audio" ? "n" : ""} ${last.lastType}`}`,
-                at: last.lastAt,
-                fromMe: last.lastFromId === req.admin.id,
-              }
+              text: last.lastType === "text" ? last.lastText : `Sent ${last.lastType === "file" ? "a file" : `a${last.lastType === "audio" ? "n" : ""} ${last.lastType}`}`,
+              at: last.lastAt,
+              fromMe: last.lastFromId === req.admin.id,
+            }
             : null,
           unreadCount: unreadByRoom.get(roomId) || 0,
         };
@@ -396,7 +399,7 @@ module.exports = {
   safeMessage,
   roomIdFor,
   markDelivered,
-  purgeMessagesBeforeToday,
-  scheduleMidnightChatPurge,
+  purgeAllMessages,
+  scheduleWeeklyChatPurge,
   MAX_ATTACHMENT_BYTES,
 };

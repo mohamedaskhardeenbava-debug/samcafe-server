@@ -66,6 +66,8 @@ const MODULES = {
   comboSectionConfig: "Combo Section Config",
   favourites: "Favourites",
   offers: "Offers",
+  subscriptions: "Subscriptions",
+  chat: "Chat",
   // Orders & bookings
   orders: "Orders",
   reservations: "Reservations",
@@ -162,6 +164,13 @@ function defaultRows() {
   for (const r of KITCHEN_ROLES) rows.push(row(r, "orders", true, true));
   for (const r of SERVICE_ROLES) rows.push(row(r, "orders", true, false));
 
+  // subscriptions — Super Admin (implicit bypass), Chef, Sous Chef only
+  for (const r of KITCHEN_ROLES) rows.push(row(r, "subscriptions", true, true));
+
+  // chat — everyone gets full access; it's a staff-wide messaging tool,
+  // not department-scoped like the rest of the matrix
+  for (const r of ALL_NON_SUPER_ROLES) rows.push(row(r, "chat", true, true));
+
   // todo (tasks) — everyone, individually scoped (scoping handled at the
   // route/UI level — each admin only ever sees/edits their own todos)
   for (const r of ALL_NON_SUPER_ROLES) rows.push(row(r, "tasks", true, true));
@@ -220,7 +229,7 @@ function defaultRows() {
  * behavior — so it is safe to run against an install a Super Admin has
  * already begun customizing.
  */
-const DEFAULTS_VERSION = 2;
+const DEFAULTS_VERSION = 4;
 
 const permissionMetaSchema = new mongoose.Schema(
   { key: { type: String, unique: true }, value: mongoose.Schema.Types.Mixed },
