@@ -32,20 +32,24 @@ const CASHFREE_BASE_URL =
     : "https://sandbox.cashfree.com/pg";
 const CASHFREE_API_VERSION = "2023-08-01";
 
-// Cashfree requires order_meta.return_url to be an absolute HTTPS URL —
-// it rejects plain http:// even for localhost. If PUBLIC_APP_URL isn't
-// set, or is set to an http:// value, fall back to a placeholder https
-// URL rather than sending something Cashfree will reject outright with
-// a 400 ("url should be https"). This URL only matters if a customer
-// completes payment via Cashfree's hosted page and gets redirected back
-// to it — it's never visited during the QR-scan flow itself, so a
-// non-reachable placeholder is safe while developing locally.
-const rawPublicAppUrl = (process.env.PUBLIC_APP_URL || "").trim();
-const PUBLIC_APP_URL = (
-  rawPublicAppUrl && rawPublicAppUrl.startsWith("https://")
-    ? rawPublicAppUrl
-    : "https://samcafe.example.com"
-).replace(/\/$/, "");
+// The customer's phone gets redirected to order_meta.return_url after
+// finishing in their UPI app — that must be a real, resolvable HTTPS URL
+// or Cashfree's own redirect dead-ends (this is what caused the earlier
+// DNS_PROBE_FINISHED_NXDOMAIN — a placeholder domain that didn't exist).
+// PUBLIC_APP_URL must be set in .env to the admin panel's real deployed
+// URL (e.g. https://sam-cafe-admin-testing.vercel.app) for the mobile
+// "Transaction Completed" page (/payment-complete) to be reachable. If
+// it's missing or still http://, fall back to Cashfree's own generic
+// success page rather than risk another dead placeholder domain.
+const rawPublicAppUrl = (process.env.PUBLIC_APP_URL || "").trim().replace(/\/$/, "");
+const PUBLIC_APP_URL = rawPublicAppUrl.startsWith("https://") ? rawPublicAppUrl : null;
+if (!PUBLIC_APP_URL) {
+  console.warn(
+    "PUBLIC_APP_URL is not set to a valid https:// URL — customers will land on Cashfree's " +
+    "own generic result page after paying instead of this app's Transaction Completed page. " +
+    "Set PUBLIC_APP_URL in .env (e.g. https://your-admin-panel-domain.com) to fix this."
+  );
+}
 
 function cashfreeConfigured() {
   return !!(process.env.CASHFREE_APP_ID && process.env.CASHFREE_SECRET_KEY);
@@ -91,12 +95,21 @@ const paymentSchema = new mongoose.Schema(
     currency: { type: String, default: "INR" },
     status: {
       type: String,
-      enum: ["PENDING", "PAID", "EXPIRED", "FAILED", "CANCELLED"],
+      enum: ["PENDING", "PAID", "EXPIRED", "FAILED", "USER_DROPPED", "CANCELLED"],
       default: "PENDING",
     },
     paymentSessionId: { type: String, default: "" },
     paymentLink: { type: String, default: "" },
     cfPaymentId: { type: String, default: "" }, // set once paid
+    // Human-readable reason for a FAILED/USER_DROPPED/CANCELLED/EXPIRED
+    // outcome, shown to staff in the admin panel's Payment Status modal
+    // (and the inline outcome card under the QR). Populated from either
+    // the Cashfree UPI simulator's own decline-reason text (relayed by
+    // the customer's browser via PATCH /orders/:id/client-status) or a
+    // generic fallback if that's ever unavailable — never left blank for
+    // a terminal non-success status.
+    lastErrorMessage: { type: String, default: "" },
+    lastErrorCode: { type: String, default: "" },
     venueId: { type: String, default: null },
     createdBy: { type: String, default: null },
     raw: { type: mongoose.Schema.Types.Mixed, default: null }, // last Cashfree response, for debugging
@@ -126,7 +139,30 @@ function safePayment(doc) {
    are, via requireAuth only. The webhook has no admin session at all
    (Cashfree calls it directly) and is verified via signature instead.
 ───────────────────────────────────────── */
-function buildRouter({ requireAuth, logAudit, emitChange }) {
+// Marks the linked restaurant order's paymentStatus as "completed" once a
+// Cashfree payment for it resolves to PAID. Best-effort: a failure here
+// never blocks the payment-status response itself, since the Payment doc
+// (the source of truth for the QR/poll flow) is already saved by the time
+// this runs.
+async function markOrderPaid(getModel, emitChange, orderId) {
+  if (!getModel || !orderId) return;
+  try {
+    const OrderModel = getModel("orders");
+    const updated = await OrderModel.findOneAndUpdate(
+      { id: orderId },
+      { $set: { paymentStatus: "completed" } },
+      { new: true }
+    ).lean();
+    if (updated) {
+      delete updated._id;
+      emitChange && emitChange("orders", "updated", updated);
+    }
+  } catch (err) {
+    console.warn("Could not mark order paymentStatus completed for order", orderId, err.message);
+  }
+}
+
+function buildRouter({ requireAuth, logAudit, emitChange, getModel }) {
   const express = require("express");
   const router = express.Router();
 
@@ -154,9 +190,13 @@ function buildRouter({ requireAuth, logAudit, emitChange }) {
           customer_phone: customerPhone || "9999999999",
         },
         order_meta: {
-          // Where Cashfree redirects the browser after a hosted-page payment.
-          // Not used for the QR flow itself, but required by the API.
-          return_url: `${PUBLIC_APP_URL}/payment-status?order_id={order_id}`,
+          // See PUBLIC_APP_URL note above. {order_id} is a Cashfree
+          // template token it substitutes with this Cashfree order's own
+          // id — the public-status endpoint below is keyed by exactly
+          // that id, and takes no restaurant/admin data at all.
+          return_url: PUBLIC_APP_URL
+            ? `${PUBLIC_APP_URL}/payment-complete?order_id={order_id}`
+            : "https://www.google.com",
           notify_url: process.env.CASHFREE_WEBHOOK_URL || undefined,
         },
         order_note: `Sam Cafe order ${orderId}${billNo ? ` (bill ${billNo})` : ""}`,
@@ -202,13 +242,70 @@ function buildRouter({ requireAuth, logAudit, emitChange }) {
     }
   });
 
+  // PATCH /payments/orders/:id/client-status — the browser embedding the
+  // Cashfree SDK reports a payment attempt's own terminal outcome here.
+  // This exists because Cashfree's ORDER-level status (what GET /orders/:id
+  // re-checks against Cashfree's API) can legitimately stay ACTIVE/PENDING
+  // even after ONE payment attempt on it fails or is dropped — the order
+  // itself is still open for a retry — so the failure/drop/decline the
+  // customer just saw in the UPI app would otherwise never reach our DB at
+  // all, and GET /orders/:id's own poll would just keep reporting PENDING
+  // forever (silently reverting any client-side-only state back to
+  // PENDING on its very next poll). This route is the one authoritative
+  // place that outcome gets persisted, with its reason, so it's visible
+  // to staff even after this admin panel session ends/refreshes.
+  router.patch("/orders/:id/client-status", requireAuth, async (req, res) => {
+    try {
+      const local = await Payment.findOne({ id: req.params.id });
+      if (!local) return res.status(404).json({ error: "Payment order not found" });
+
+      // PAID must only ever be set from a Cashfree-verified source (the
+      // webhook, or GET /orders/:id's own re-check against Cashfree's
+      // order-status API) — never trust the client's word alone that a
+      // payment succeeded. This route is for reporting a FAILURE the
+      // client observed, so anything but a real terminal-failure status
+      // is rejected outright.
+      const ALLOWED = ["FAILED", "USER_DROPPED", "EXPIRED", "CANCELLED"];
+      const status = String(req.body?.status || "").toUpperCase();
+      if (!ALLOWED.includes(status)) {
+        return res.status(400).json({ error: `status must be one of ${ALLOWED.join(", ")}` });
+      }
+
+      // Never downgrade a payment that's already resolved — PAID stands
+      // no matter what a stale/late client report says, and once one
+      // terminal-failure reason is recorded, a second one (e.g. from a
+      // delayed duplicate report) shouldn't overwrite the first.
+      if (local.status === "PAID" || (local.status !== "PENDING" && local.status !== "ACTIVE")) {
+        return res.json(safePayment(local));
+      }
+
+      local.status = status;
+      local.lastErrorMessage = String(req.body?.message || "").slice(0, 500) || "No reason provided by the payment gateway.";
+      local.lastErrorCode = String(req.body?.code || "").slice(0, 100);
+      await local.save();
+      emitChange && emitChange("payments", "updated", safePayment(local));
+
+      res.json(safePayment(local));
+    } catch (err) {
+      console.error("PATCH /payments/orders/:id/client-status", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // GET /payments/orders/:id — poll status (admin panel calls this after showing the QR)
   router.get("/orders/:id", requireAuth, async (req, res) => {
     try {
       const local = await Payment.findOne({ id: req.params.id });
       if (!local) return res.status(404).json({ error: "Payment order not found" });
 
-      // Re-check with Cashfree in case the webhook hasn't landed yet.
+      // Re-check with Cashfree in case the webhook hasn't landed yet. Only
+      // when we're still PENDING/ACTIVE — once client-status (above) or
+      // the webhook has recorded a terminal outcome, this must NOT poll
+      // Cashfree's order-level status and overwrite it: the order can
+      // stay ACTIVE there even after this specific attempt failed, which
+      // is exactly the bug this whole route was added to fix (the failure
+      // message flashing then reverting back to the QR/PENDING a few
+      // seconds later).
       if (cashfreeConfigured() && local.status === "PENDING") {
         try {
           const cfRes = await fetch(`${CASHFREE_BASE_URL}/orders/${encodeURIComponent(req.params.id)}`, {
@@ -222,6 +319,7 @@ function buildRouter({ requireAuth, logAudit, emitChange }) {
               local.raw = cfData;
               await local.save();
               emitChange && emitChange("payments", "updated", safePayment(local));
+              if (mapped === "PAID") await markOrderPaid(getModel, emitChange, local.orderId);
             }
           }
         } catch (pollErr) {
@@ -232,6 +330,53 @@ function buildRouter({ requireAuth, logAudit, emitChange }) {
       res.json(safePayment(local));
     } catch (err) {
       console.error("GET /payments/orders/:id", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // GET /payments/public-status/:id — no admin session. This is the ONLY
+  // payments endpoint a customer's own phone can reach (after Cashfree
+  // redirects it to our return_url with ?order_id=<this id>), so it
+  // deliberately returns nothing beyond status + amount — no cfPaymentId,
+  // venueId, createdBy, or the restaurant's internal orderId — unlike
+  // safePayment() which is fine to expose to authenticated staff.
+  router.get("/public-status/:id", async (req, res) => {
+    try {
+      const local = await Payment.findOne({ id: req.params.id });
+      if (!local) return res.status(404).json({ error: "Payment not found" });
+
+      // Same re-check-with-Cashfree fallback as the authenticated route,
+      // so a customer landing here right after paying doesn't see a stale
+      // PENDING if the webhook hasn't landed yet.
+      if (cashfreeConfigured() && local.status === "PENDING") {
+        try {
+          const cfRes = await fetch(`${CASHFREE_BASE_URL}/orders/${encodeURIComponent(req.params.id)}`, {
+            headers: cashfreeHeaders(),
+          });
+          if (cfRes.ok) {
+            const cfData = await cfRes.json();
+            const mapped = mapCashfreeStatus(cfData.order_status);
+            if (mapped && mapped !== local.status) {
+              local.status = mapped;
+              local.raw = cfData;
+              await local.save();
+              emitChange && emitChange("payments", "updated", safePayment(local));
+              if (mapped === "PAID") await markOrderPaid(getModel, emitChange, local.orderId);
+            }
+          }
+        } catch (pollErr) {
+          console.warn("Cashfree status poll failed (public-status), returning last-known status", pollErr.message);
+        }
+      }
+
+      res.json({
+        status: local.status,
+        amount: local.amount,
+        currency: local.currency,
+        message: local.lastErrorMessage || "",
+      });
+    } catch (err) {
+      console.error("GET /payments/public-status/:id", err);
       res.status(500).json({ error: err.message });
     }
   });
@@ -269,8 +414,23 @@ function buildRouter({ requireAuth, logAudit, emitChange }) {
           console.warn("Cashfree webhook signature mismatch — rejecting");
           return res.status(401).json({ error: "Invalid signature" });
         }
+      } else if (process.env.NODE_ENV === "production") {
+        // In production, an unsigned/unverifiable webhook is refused outright
+        // rather than trusted — a missing secret or signature here would
+        // otherwise let a forged request mark any order as paid with zero
+        // authentication. Fail closed: this is a payment-integrity boundary,
+        // not a convenience check.
+        console.error(
+          "Cashfree webhook rejected: signature verification unavailable " +
+          "(secret configured: " + !!secret + ", signature header present: " + !!signature + "). " +
+          "Set CASHFREE_WEBHOOK_SECRET (or CASHFREE_SECRET_KEY) to accept webhooks in production."
+        );
+        return res.status(401).json({ error: "Webhook signature verification is not configured" });
       } else {
-        console.warn("Cashfree webhook received without signature verification configured — set CASHFREE_WEBHOOK_SECRET");
+        // Non-production (local/sandbox testing without a configured secret):
+        // log and proceed, since blocking local development entirely would be
+        // a worse default than a clearly-logged, non-production-only trust gap.
+        console.warn("Cashfree webhook received without signature verification configured — set CASHFREE_WEBHOOK_SECRET (allowed only because NODE_ENV is not \"production\")");
       }
 
       const event = JSON.parse(rawBody.toString());
@@ -280,11 +440,13 @@ function buildRouter({ requireAuth, logAudit, emitChange }) {
       if (cfOrderId) {
         const local = await Payment.findOne({ id: cfOrderId });
         if (local) {
+          const becamePaid = status === "PAID" && local.status !== "PAID";
           if (status) local.status = status;
           local.cfPaymentId = event?.data?.payment?.cf_payment_id || local.cfPaymentId;
           local.raw = event;
           await local.save();
           emitChange && emitChange("payments", "updated", safePayment(local));
+          if (becamePaid) await markOrderPaid(getModel, emitChange, local.orderId);
         }
       }
 
@@ -304,7 +466,14 @@ function mapCashfreeStatus(cfStatus) {
   const s = (cfStatus || "").toUpperCase();
   if (["PAID", "SUCCESS"].includes(s)) return "PAID";
   if (["EXPIRED"].includes(s)) return "EXPIRED";
-  if (["FAILED", "CANCELLED", "USER_DROPPED", "PAYMENT_FAILED"].includes(s)) return "FAILED";
+  // USER_DROPPED is its own outcome (customer backed out of the UPI app
+  // mid-flow) — kept distinct from FAILED (bank/gateway declined it) and
+  // CANCELLED, so the four possible outcomes shown in the admin panel's
+  // Payment Status modal match Cashfree's own UPI simulator buttons
+  // (SUCCESS / PENDING / USER_DROPPED / FAILED) one-to-one.
+  if (["USER_DROPPED"].includes(s)) return "USER_DROPPED";
+  if (["CANCELLED"].includes(s)) return "CANCELLED";
+  if (["FAILED", "PAYMENT_FAILED"].includes(s)) return "FAILED";
   if (["ACTIVE", "PENDING"].includes(s)) return "PENDING";
   return null;
 }

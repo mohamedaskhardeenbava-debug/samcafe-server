@@ -340,23 +340,71 @@ function notifyNewBooking(resource, body) {
  */
 async function generateOrderId() {
   const Model = getModel("orders");
-  const docs = await Model.find(
-    { id: { $regex: /^order_\d+$/ } },
-    { id: 1 }
+  const Counter = getModel("counters");
+
+  // Fast path: atomically increment a persisted counter instead of scanning
+  // every existing order id on every single order creation. This used to be
+  // an O(n) scan over the whole orders collection (already 2,000+ documents
+  // and growing) purely to find the current maximum id — this reduces that
+  // to a single indexed upsert.
+  let counterDoc = await Counter.findOneAndUpdate(
+    { id: "order_id_counter" },
+    { $inc: { seq: 1 } },
+    { new: true }
   ).lean();
 
-  let maxNum = 0;
-  for (const d of docs) {
-    const n = parseInt(d.id.replace("order_", ""), 10);
-    if (!isNaN(n) && n > maxNum) maxNum = n;
+  if (!counterDoc) {
+    // First-ever call (no counter document exists yet): seed it from the
+    // current maximum order id, exactly as the old scan-based logic did,
+    // so numbering picks up where existing orders left off rather than
+    // restarting from 1. This scan only ever runs once, at seed time.
+    const docs = await Model.find(
+      { id: { $regex: /^order_\d+$/ } },
+      { id: 1 }
+    ).lean();
+    let maxNum = 0;
+    for (const d of docs) {
+      const n = parseInt(d.id.replace("order_", ""), 10);
+      if (!isNaN(n) && n > maxNum) maxNum = n;
+    }
+    // Upsert with the seeded value, then increment atomically. If two
+    // requests race to seed at the same time, the unique `id` on the
+    // counter document means only one insert wins; the loser simply
+    // retries the increment against the now-existing document.
+    try {
+      counterDoc = await Counter.findOneAndUpdate(
+        { id: "order_id_counter" },
+        { $setOnInsert: { seq: maxNum } },
+        { new: true, upsert: true }
+      ).lean();
+      counterDoc = await Counter.findOneAndUpdate(
+        { id: "order_id_counter" },
+        { $inc: { seq: 1 } },
+        { new: true }
+      ).lean();
+    } catch (err) {
+      // Extremely unlikely duplicate-key race on first seed; just retry once.
+      counterDoc = await Counter.findOneAndUpdate(
+        { id: "order_id_counter" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      ).lean();
+    }
   }
 
-  let candidateNum = maxNum + 1;
+  let candidateNum = counterDoc.seq;
   let candidate = `order_${String(candidateNum).padStart(5, "0")}`;
 
-  // Guard against rare concurrent-order race
+  // Guard against the (now rarer, but still possible if the counter and the
+  // orders collection ever drift — e.g. a manually-inserted order) case
+  // where the candidate id already exists.
   while (await Model.exists({ id: candidate })) {
-    candidateNum += 1;
+    const bumped = await Counter.findOneAndUpdate(
+      { id: "order_id_counter" },
+      { $inc: { seq: 1 } },
+      { new: true }
+    ).lean();
+    candidateNum = bumped.seq;
     candidate = `order_${String(candidateNum).padStart(5, "0")}`;
   }
   return candidate;
@@ -877,6 +925,9 @@ app.post("/orders", async (req, res) => {
   try {
     const newOrder = { ...req.body };
     newOrder.id = await generateOrderId();
+    // Every new order starts unpaid — flips to "completed" once a scanned
+    // Cashfree QR payment for it succeeds (see payments.js).
+    if (!newOrder.paymentStatus) newOrder.paymentStatus = "pending";
     // Customer-facing order placement doesn't go through admin auth, so it
     // can't be scoped from req.admin. The user panel should send venueId
     // once it has branch selection; until then, fall back to whichever
@@ -1523,6 +1574,19 @@ io.on("connection", (socket) => {
       socket.emit("printer:register-ack", { ok: false, error: "Invalid secret" });
       return;
     }
+    if (printerSocketId && printerSocketId !== socket.id && io.sockets.sockets.get(printerSocketId)) {
+      // A different bridge is already connected and registered. The new
+      // registration still wins (last-registered-wins, unchanged behavior),
+      // but this is now surfaced loudly instead of silently swapping which
+      // physical printer receives jobs — a second bridge coming online
+      // (e.g. a duplicate process, or a second physical bridge on the same
+      // network) is a real operational event, not routine reconnection.
+      console.warn(
+        `Printer bridge conflict: ${socket.id} is registering while ${printerSocketId} ` +
+        `is already the active bridge. The new connection will take over — ` +
+        `if this is unexpected, check for a duplicate bridge process or device.`
+      );
+    }
     printerSocketId = socket.id;
     socket.data.isPrinterBridge = true;
     console.log(`Printer bridge registered: ${socket.id}`);
@@ -1649,7 +1713,7 @@ app.use(
 );
 app.use(
   "/payments",
-  paymentsModule.buildRouter({ requireAuth: requireAdminAuth, logAudit, emitChange })
+  paymentsModule.buildRouter({ requireAuth: requireAdminAuth, logAudit, emitChange, getModel })
 );
 app.use(
   "/bank-account",
