@@ -35,7 +35,7 @@ const bankAccountSchema = new mongoose.Schema(
     ifscCode: { type: String, default: "", uppercase: true, trim: true },
     bankName: { type: String, default: "", trim: true },
     branchName: { type: String, default: "", trim: true },
-    upiVpa: { type: String, default: "", trim: true }, // optional, e.g. for reference/fallback
+    upiVpa: { type: String, default: "", trim: true }, // required — the UPI QR payment system (payments.js) reads this to build every order's payment QR
     updatedBy: { type: String, default: null }, // admin id
   },
   { timestamps: true, versionKey: false }
@@ -59,6 +59,20 @@ function safeBankAccount(doc, { reveal = false } = {}) {
     obj.accountNumber = maskAccountNumber(obj.accountNumber);
   }
   return obj;
+}
+
+/**
+ * Loose but real validation for a UPI VPA (Virtual Payment Address),
+ * e.g. "samcafe@okhdfcbank" or "9876543210@ybl". Every UPI handle
+ * follows <name>@<bank/PSP handle>; this intentionally does not
+ * maintain a hardcoded list of valid bank/PSP handles (new ones are
+ * added by NPCI over time and this app has no way to stay in sync with
+ * that list) — it just checks the shape is plausible, so a payment QR
+ * is never generated against an obviously-wrong value like a stray
+ * email address or empty string.
+ */
+function isValidUpiVpa(vpa) {
+  return /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z][a-zA-Z0-9.\-_]{1,64}$/.test(String(vpa || "").trim());
 }
 
 /* ─────────────────────────────────────────
@@ -94,6 +108,15 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       if (!accountHolderName || !accountNumber || !ifscCode || !bankName) {
         return res.status(400).json({ error: "accountHolderName, accountNumber, ifscCode, and bankName are required" });
       }
+      // upiVpa is required (not merely "recommended") — the Direct UPI
+      // QR Payment System (payments.js) has no other source for the
+      // payee address every order's payment QR is built against, so a
+      // missing/malformed value here would silently block every order
+      // page's "Generate QR" action later instead of failing clearly,
+      // right here, at the one place it's actually being set.
+      if (!upiVpa || !isValidUpiVpa(upiVpa)) {
+        return res.status(400).json({ error: "A valid UPI ID is required, e.g. yourname@okhdfcbank" });
+      }
 
       const before = await BankAccount.findOne({ id: SINGLETON_ID }).lean();
       const doc = await BankAccount.findOneAndUpdate(
@@ -105,7 +128,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
             ifscCode: String(ifscCode).toUpperCase(),
             bankName,
             branchName: branchName || "",
-            upiVpa: upiVpa || "",
+            upiVpa: String(upiVpa).trim(),
             updatedBy: req.admin.id,
           },
         },

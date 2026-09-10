@@ -26,6 +26,7 @@ const rolesModule = require("./roles");
 const workPlanModule = require("./workPlan");
 const auditLogModule = require("./auditLog");
 const documentsModule = require("./documents");
+const { isThumbnailableDocument, generateFirstPageThumbnail } = require("./fileThumbnail");
 const paymentsModule = require("./payments");
 const bankAccountModule = require("./bankAccount");
 const chatModule = require("./chat");
@@ -87,13 +88,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-// Cashfree webhook signature verification needs the exact raw request
-// bytes it signed — must be parsed as a raw Buffer BEFORE the global
-// express.json() below (which would otherwise consume/parse the body
-// first and make HMAC verification impossible). Every other route keeps
-// the normal JSON parsing.
-app.use("/payments/webhook", express.raw({ type: "*/*", limit: "1mb" }));
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
@@ -288,6 +282,77 @@ function stripMeta(doc) {
   delete out._id;
   delete out.__v;
   return out;
+}
+
+/**
+ * Generates (or refreshes) first-page-preview thumbnails for a staff
+ * record's file fields, in place on the given body object.
+ *
+ * `staff` is one of the generic, schemaless ARRAY_COLLECTIONS, so
+ * there's no fixed field list to hook into at the schema level —
+ * instead this is called explicitly from the staff-specific branches
+ * of the POST/PUT/PATCH /staff handlers below, mirroring how the
+ * DELETE handler already special-cases `name === "staff"` for linked
+ * login-account cleanup.
+ *
+ * Covers:
+ *   - body.idProof / body.bonafide           — flat fields
+ *   - body.training[].certificate            — nested array field
+ *
+ * `previousDoc` (the record's existing state before this write, or
+ * null on create) lets this skip re-rendering a thumbnail for a file
+ * that didn't actually change — training records in particular can
+ * be a long-lived array where most edits don't touch older entries'
+ * certificates.
+ *
+ * Best-effort: a render failure never blocks the save (already
+ * handled inside generateFirstPageThumbnail, which returns null
+ * rather than throwing).
+ */
+async function attachStaffFileThumbnails(body, previousDoc) {
+  const flatFileFields = [
+    { dataField: "idProof", typeField: "idProofType", thumbField: "idProofThumbnail" },
+    { dataField: "bonafide", typeField: "bonafideType", thumbField: "bonafideThumbnail" },
+  ];
+
+  for (const { dataField, typeField, thumbField } of flatFileFields) {
+    if (body[dataField] === undefined) continue; // field not part of this write
+    const fileType = body[typeField] || sniffMimeFromDataUrl(body[dataField]);
+    const fileChanged = !previousDoc || body[dataField] !== previousDoc[dataField];
+    // Also regenerate when this record predates the thumbnail feature
+    // and has never had one — see the PUT /documents route in
+    // documents.js for the same self-healing rationale.
+    const missingThumbnail = !previousDoc?.[thumbField];
+    if (!fileChanged && !missingThumbnail) continue; // keep the existing thumbnail
+    body[thumbField] = isThumbnailableDocument(fileType) && body[dataField]
+      ? (await generateFirstPageThumbnail(fileType, body[dataField])) || ""
+      : "";
+  }
+
+  if (Array.isArray(body.training)) {
+    const previousTraining = Array.isArray(previousDoc?.training) ? previousDoc.training : [];
+    for (const entry of body.training) {
+      if (!entry || !entry.certificate) continue;
+      const previousEntry = previousTraining.find(t => t && t.id && entry.id && t.id === entry.id);
+      const fileChanged = !previousEntry || entry.certificate !== previousEntry.certificate;
+      const missingThumbnail = !previousEntry?.certificateThumbnail;
+      if (!fileChanged && !missingThumbnail) {
+        if (previousEntry?.certificateThumbnail) entry.certificateThumbnail = previousEntry.certificateThumbnail;
+        continue;
+      }
+      const fileType = entry.certificateType || sniffMimeFromDataUrl(entry.certificate);
+      entry.certificateThumbnail = isThumbnailableDocument(fileType)
+        ? (await generateFirstPageThumbnail(fileType, entry.certificate)) || ""
+        : "";
+    }
+  }
+}
+
+/** Reads the mime type out of a `data:<mime>;base64,...` URL, if present. */
+function sniffMimeFromDataUrl(dataUrl) {
+  if (typeof dataUrl !== "string") return "";
+  const match = /^data:([^;,]+)[;,]/.exec(dataUrl);
+  return match ? match[1] : "";
 }
 
 /** Emit an event to a single admin's own socket room (see chat:register above). */
@@ -925,8 +990,8 @@ app.post("/orders", async (req, res) => {
   try {
     const newOrder = { ...req.body };
     newOrder.id = await generateOrderId();
-    // Every new order starts unpaid — flips to "completed" once a scanned
-    // Cashfree QR payment for it succeeds (see payments.js).
+    // Every new order starts unpaid — flips to "completed" once an admin
+    // confirms a scanned UPI QR payment for it (see payments.js).
     if (!newOrder.paymentStatus) newOrder.paymentStatus = "pending";
     // Customer-facing order placement doesn't go through admin auth, so it
     // can't be scoped from req.admin. The user panel should send venueId
@@ -1134,6 +1199,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
         }
         const body = { ...req.body, venueId };
         if (!body.id) body.id = String(Date.now());
+        if (name === "staff") await attachStaffFileThumbnails(body, null);
         const doc = await getModel(name).create(body);
         const result = stripMeta(doc.toObject());
         emitChange(name, "created", result);
@@ -1159,6 +1225,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
         return res.status(400).json({ error: "venueId is required (Super Admin must specify one)" });
       }
       const body = { ...req.body, id: req.params.id, venueId };
+      if (name === "staff") await attachStaffFileThumbnails(body, before);
       const doc = await getModel(name)
         .findOneAndReplace(filter, body, { returnDocument: "after", upsert: true })
         .lean();
@@ -1181,6 +1248,7 @@ ARRAY_COLLECTIONS.forEach((name) => {
       // venueId is never editable via PATCH body — reassigning a record to
       // a different venue is a deliberate, separate operation if ever needed.
       const { venueId: _ignoredVenueId, ...patchBody } = req.body;
+      if (name === "staff") await attachStaffFileThumbnails(patchBody, before);
       const doc = await getModel(name)
         .findOneAndUpdate(filter, { $set: patchBody }, { returnDocument: "after" })
         .lean();

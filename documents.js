@@ -17,6 +17,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
+const { isThumbnailableDocument, generateFirstPageThumbnail } = require("./fileThumbnail");
 
 const router = express.Router();
 
@@ -36,6 +37,13 @@ const documentSchema = new mongoose.Schema(
     fileName: { type: String, default: "" },
     fileType: { type: String, default: "" },
     fileData: { type: String, default: "" }, // base64 data URL
+    // Rendered preview of the file's first page (PDF/DOCX only — see
+    // fileThumbnail.js), generated once at upload time and cached
+    // here so the admin panel's file link can show a real preview
+    // image instead of a generic icon without re-rendering on every
+    // page view. Empty string when the file type isn't thumbnailable
+    // or rendering failed (never blocks saving the document itself).
+    thumbnailData: { type: String, default: "" },
     venueId: { type: String, default: null },
     createdBy: { type: String, default: null }, // admin id
   },
@@ -90,6 +98,13 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       if (!DEPARTMENTS.includes(department)) {
         return res.status(400).json({ error: `department must be one of: ${DEPARTMENTS.join(", ")}` });
       }
+      // Rendering is best-effort: a failure here must never block
+      // saving the document itself, so this is intentionally outside
+      // any try/catch that would abort the request — errors are
+      // already swallowed and logged inside generateFirstPageThumbnail.
+      const thumbnailData = isThumbnailableDocument(fileType) && fileData
+        ? (await generateFirstPageThumbnail(fileType, fileData)) || ""
+        : "";
       const doc = await Document.create({
         id: req.body.id || newDocumentId(),
         name,
@@ -100,6 +115,7 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
         fileName: fileName || "",
         fileType: fileType || "",
         fileData: fileData || "",
+        thumbnailData,
         venueId: venueId || null,
         createdBy: req.admin.id,
       });
@@ -131,6 +147,24 @@ function buildRouter({ requireAuth, requireRole, logAudit }) {
       if (fileType !== undefined) update.fileType = fileType;
       if (fileData !== undefined) update.fileData = fileData;
       if (venueId !== undefined) update.venueId = venueId;
+
+      // Re-render the thumbnail when the file itself changed, OR when
+      // this record predates the thumbnail feature and has never had
+      // one generated (before.thumbnailData is empty) — so editing an
+      // old document (even just renaming it) self-heals its missing
+      // thumbnail instead of staying stuck on the icon fallback
+      // forever. Skipped only when a thumbnail already exists and the
+      // file hasn't changed, since that's the case that shouldn't pay
+      // the render cost again.
+      const effectiveFileData = fileData !== undefined ? fileData : before.fileData;
+      const effectiveFileType = fileType !== undefined ? fileType : before.fileType;
+      const fileChanged = fileData !== undefined && fileData !== before.fileData;
+      const missingThumbnail = !before.thumbnailData;
+      if (fileChanged || missingThumbnail) {
+        update.thumbnailData = isThumbnailableDocument(effectiveFileType) && effectiveFileData
+          ? (await generateFirstPageThumbnail(effectiveFileType, effectiveFileData)) || ""
+          : "";
+      }
 
       const doc = await Document.findOneAndUpdate(
         { id: req.params.id },
